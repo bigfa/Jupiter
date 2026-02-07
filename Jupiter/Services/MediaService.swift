@@ -20,4 +20,17 @@ struct MediaService {
     func fetchMediaDetail(id: String) async throws -> MediaDetailResponse {
         return try await APIClient.shared.get(path: "/api/media/\(id)")
     }
+
+    func fetchMediaLikes(id: String) async throws -> MediaLikeResponse {
+        return try await APIClient.shared.get(path: "/api/media/\(id)/like")
+    }
+
+    func likeMedia(id: String) async throws -> MediaLikeResponse {
+        struct Body: Encodable { let action: String }
+        return try await APIClient.shared.post(path: "/api/media/\(id)/like", body: Body(action: "like"))
+    }
+
+    func unlikeMedia(id: String) async throws -> MediaLikeResponse {
+        return try await APIClient.shared.delete(path: "/api/media/\(id)/like")
+    }
 }

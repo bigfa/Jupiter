@@ -33,6 +33,22 @@ struct MediaMasonryCard: View {
             .frame(maxWidth: .infinity)
             .background(Color(.secondarySystemBackground))
             .clipped()
+            .overlay(alignment: .bottomLeading) {
+                if let likes = item.likes, likes > 0 {
+                    HStack(spacing: 3) {
+                        Image(systemName: "heart.fill")
+                            .font(.system(size: 10))
+                        Text("\(likes)")
+                            .font(.caption2)
+                    }
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 3)
+                    .background(Color.black.opacity(0.5))
+                    .clipShape(Capsule())
+                    .padding(6)
+                }
+            }
 
         if let heroNamespace, isHero {
             image.matchedGeometryEffect(id: item.id, in: heroNamespace, isSource: true)

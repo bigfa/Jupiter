@@ -303,6 +303,7 @@ private struct MetadataDrawer: View {
     let mediumHeight: CGFloat
     let expandedHeight: CGFloat
     @State private var dragStartHeight: CGFloat? = nil
+    @State private var likeViewModel: MediaLikeViewModel?
 
     private var currentHeight: CGFloat { height }
     private var anchors: [CGFloat] { [collapsedHeight, mediumHeight, expandedHeight] }
@@ -322,6 +323,22 @@ private struct MetadataDrawer: View {
                     Text("Metadata")
                         .font(.subheadline.weight(.semibold))
                     Spacer()
+                    if let likeViewModel {
+                        HStack(spacing: 8) {
+                            if likeViewModel.likes > 0 {
+                                Text("♥︎ \(likeViewModel.likes)")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Button {
+                                Task { await likeViewModel.toggle() }
+                            } label: {
+                                Image(systemName: likeViewModel.liked ? "heart.fill" : "heart")
+                                    .font(.body)
+                                    .foregroundStyle(likeViewModel.liked ? .pink : .secondary)
+                            }
+                        }
+                    }
                 }
 
                 ScrollView(showsIndicators: false) {
@@ -375,6 +392,12 @@ private struct MetadataDrawer: View {
         }
         .onAppear {
             height = nearestAnchor(to: height)
+        }
+        .task(id: item?.id) {
+            guard let item else { return }
+            let vm = MediaLikeViewModel(mediaId: item.id)
+            likeViewModel = vm
+            await vm.load()
         }
     }
 
