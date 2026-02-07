@@ -1,0 +1,19 @@
+# macOS
+.DS_Store
+
+# Xcode user data
+*.xcuserstate
+*.xccheckout
+xcuserdata/
+Jupiter.xcodeproj/xcuserdata/
+
+# Build artifacts
+DerivedData/
+.derivedData/
+build/
+.build/
+
+# Local tool/workspace folders
+.claude/
+.idea/
+.vscode/
