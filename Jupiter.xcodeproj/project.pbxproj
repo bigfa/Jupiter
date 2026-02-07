@@ -8,16 +8,34 @@
 
 /* Begin PBXBuildFile section */
 		AA1F5A1A2F35000100320872 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = AA1F5A1B2F35000100320872 /* Kingfisher */; };
+		C4A100012F36000100320872 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C4A100022F36000100320872 /* XCTest.framework */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		C4A100092F36000100320872 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9BD6C30F2F3467C300320871 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9BD6C3162F3467C300320871;
+			remoteInfo = Jupiter;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		9BD6C3172F3467C300320871 /* Jupiter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Jupiter.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C4A100002F36000100320872 /* JupiterTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JupiterTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C4A100022F36000100320872 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = System/Library/Frameworks/XCTest.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		9BD6C3192F3467C300320871 /* Jupiter */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Jupiter;
+			sourceTree = "<group>";
+		};
+		C4A100032F36000100320872 /* JupiterTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = JupiterTests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -31,6 +49,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C4A100052F36000100320872 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C4A100012F36000100320872 /* XCTest.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -38,6 +64,7 @@
 			isa = PBXGroup;
 			children = (
 				9BD6C3192F3467C300320871 /* Jupiter */,
+				C4A100032F36000100320872 /* JupiterTests */,
 				9BD6C3182F3467C300320871 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -46,6 +73,7 @@
 			isa = PBXGroup;
 			children = (
 				9BD6C3172F3467C300320871 /* Jupiter.app */,
+				C4A100002F36000100320872 /* JupiterTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -76,6 +104,29 @@
 			productReference = 9BD6C3172F3467C300320871 /* Jupiter.app */;
 			productType = "com.apple.product-type.application";
 		};
+		C4A100082F36000100320872 /* JupiterTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C4A1000D2F36000100320872 /* Build configuration list for PBXNativeTarget "JupiterTests" */;
+			buildPhases = (
+				C4A100062F36000100320872 /* Sources */,
+				C4A100052F36000100320872 /* Frameworks */,
+				C4A100072F36000100320872 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C4A1000A2F36000100320872 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				C4A100032F36000100320872 /* JupiterTests */,
+			);
+			name = JupiterTests;
+			packageProductDependencies = (
+			);
+			productName = JupiterTests;
+			productReference = C4A100002F36000100320872 /* JupiterTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -88,6 +139,10 @@
 				TargetAttributes = {
 					9BD6C3162F3467C300320871 = {
 						CreatedOnToolsVersion = 26.2;
+					};
+					C4A100082F36000100320872 = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = 9BD6C3162F3467C300320871;
 					};
 				};
 			};
@@ -109,12 +164,20 @@
 			projectRoot = "";
 			targets = (
 				9BD6C3162F3467C300320871 /* Jupiter */,
+				C4A100082F36000100320872 /* JupiterTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		9BD6C3152F3467C300320871 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C4A100072F36000100320872 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -131,7 +194,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C4A100062F36000100320872 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C4A1000A2F36000100320872 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9BD6C3162F3467C300320871 /* Jupiter */;
+			targetProxy = C4A100092F36000100320872 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		9BD6C3252F3467C500320871 /* Debug */ = {
@@ -275,7 +353,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = fatesinger.Jupiter;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -308,7 +386,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = fatesinger.Jupiter;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -318,6 +396,56 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		C4A1000B2F36000100320872 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = HJK86R3UY7;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = fatesinger.JupiterTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Jupiter.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Jupiter";
+			};
+			name = Debug;
+		};
+		C4A1000C2F36000100320872 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = HJK86R3UY7;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = fatesinger.JupiterTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Jupiter.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Jupiter";
 			};
 			name = Release;
 		};
@@ -338,6 +466,15 @@
 			buildConfigurations = (
 				9BD6C3282F3467C500320871 /* Debug */,
 				9BD6C3292F3467C500320871 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C4A1000D2F36000100320872 /* Build configuration list for PBXNativeTarget "JupiterTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C4A1000B2F36000100320872 /* Debug */,
+				C4A1000C2F36000100320872 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
