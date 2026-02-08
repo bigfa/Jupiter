@@ -2,7 +2,7 @@
 
 **Feature Branch**: `[001-media-detail-interaction-polish]`  
 **Created**: 2026-02-08  
-**Status**: Draft  
+**Status**: In Progress（基础实现已完成，待验收与单测补齐）
 **Input**: User description: "统一修复图片详情页中抽屉贴边、按钮避让、拖拽与点赞反馈问题，达到可稳定交付状态"
 
 ## User Scenarios & Testing *(mandatory)*
@@ -64,13 +64,13 @@
 - **FR-003**: 用户 MUST 能在详情页稳定点击点赞按钮，不受抽屉点击手势误拦截。
 - **FR-004**: 系统 MUST 在点赞请求期间展示明确 loading 状态并防止重复提交。
 - **FR-005**: 系统 MUST 在点赞请求失败时显示可读错误信息并允许重试。
-- **FR-006**: 系统 MUST 在切换图片时确保点赞状态与当前媒体 ID 一致，避免旧请求回写。
+- **FR-006**: 系统 MUST 在切换图片时确保点赞状态与当前媒体 ID 一致，避免旧请求回写。实现约束：通过 `latestRequestID` 模式，仅允许最新请求写入 ViewModel 状态。
 
 ### Key Entities *(include if feature involves data)*
 
-- **MediaLikeState**: 当前媒体的点赞状态，包含 `mediaId`、`liked`、`likes`、`isLoading`、`errorMessage`。
-- **MetadataDrawerState**: 抽屉状态，包含 `collapsed/medium/expanded` 高度锚点与当前高度。
-- **MediaZoomLayoutState**: 详情页布局状态，包含安全区、按钮位置与图片偏移/缩放参数。
+- **`MediaLikeViewModel`** (`Jupiter/Views/MediaLikeViewModel.swift`): 当前媒体的点赞状态，包含 `mediaId`、`liked`、`likes`、`isLoading`、`errorMessage`，通过 `latestRequestID` 保护并发安全。
+- **`MetadataDrawer`** (`Jupiter/Views/MediaZoomPagerView.swift` 内 private struct): 抽屉状态，管理 `collapsed/medium/expanded` 高度锚点、当前高度与 `bottomInset` 补偿。
+- **`MediaZoomDetailPage`** (`Jupiter/Views/MediaZoomPagerView.swift` 内 struct): 详情页单页布局状态，包含安全区传入、关闭按钮位置、图片偏移/缩放与拖拽轴判定。
 
 ## Success Criteria *(mandatory)*
 
