@@ -1,0 +1,112 @@
+# Implementation Plan: 媒体详情交互收尾优化
+
+**Branch**: `[001-media-detail-interaction-polish]` | **Date**: 2026-02-08 | **Spec**: `/Users/rich/Projects/Jupiter/specs/001-media-detail-interaction-polish/spec.md`  
+**Input**: Feature specification from `/Users/rich/Projects/Jupiter/specs/001-media-detail-interaction-polish/spec.md`
+
+## Summary
+
+本次实现目标是将媒体详情页交互收敛到可稳定交付状态，聚焦三个问题域：  
+1) Metadata 抽屉底部贴边与安全区一致；  
+2) 顶部关闭按钮避让状态栏且层级稳定；  
+3) 点赞交互具备明确 loading/error 反馈并支持可回归测试。  
+
+核心做法是在 `MediaZoomPagerView` 统一管理安全区和抽屉容器高度，在 `MediaLikeViewModel` 增加可观测错误状态与请求上下文保护，同时补齐单测与验收清单。
+
+## Technical Context
+
+**Language/Version**: Swift 5  
+**Primary Dependencies**: SwiftUI, Kingfisher (`7.12.0`)  
+**Storage**: N/A（客户端不新增本地持久化）  
+**Testing**: XCTest + `xcodebuild test` + 手工交互验证  
+**Target Platform**: iOS 18.6+（当前工程配置）  
+**Project Type**: Mobile (single iOS app)  
+**Performance Goals**: 详情页拖拽/抽屉动画保持流畅（目标接近 60fps），点赞点击反馈在 120ms 内出现  
+**Constraints**: 不改后端 API；不破坏左右翻页和下拉关闭交互；不引入新图片库  
+**Scale/Scope**: 1 个功能 spec，约 3~5 个源码文件 + 1~2 个测试文件
+
+## Constitution Check
+
+*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+
+- **I. User Experience Consistency First**: 通过。实现以安全区、层级和手势冲突为主线，不做额外视觉重构。
+- **II. API Contract Driven Development**: 通过。点赞接口沿用现有 `/api/media/{id}/like`，仅补客户端错误可见性。
+- **III. Testable by Default**: 通过。新增/扩展 `MediaLikeViewModel` 相关单测覆盖成功、失败和请求竞态。
+- **IV. Incremental and Reversible Delivery**: 通过。按 US1/US2/US3 分段实施，每段可单独验证。
+- **V. Simplicity and Observability**: 通过。采用最小改动路径，异常通过 `errorMessage` 直达 UI。
+
+## Project Structure
+
+### Documentation (this feature)
+
+```text
+specs/001-media-detail-interaction-polish/
+├── plan.md
+├── spec.md
+└── tasks.md
+```
+
+### Source Code (repository root)
+
+```text
+Jupiter/
+├── Views/
+│   ├── MediaZoomPagerView.swift
+│   └── MediaLikeViewModel.swift
+├── Services/
+│   └── MediaService.swift
+└── Networking/
+    └── APIClient.swift
+
+JupiterTests/
+├── MediaLikeViewModelTests.swift
+└── APIClientTests.swift
+```
+
+**Structure Decision**: 保持现有单 iOS 工程结构，仅在现有视图、ViewModel、服务层和测试目录增量修改。
+
+## Implementation Phases
+
+### Phase 0 - Baseline and Risk Guard
+
+- 固化当前问题基线（底部白边、关闭按钮遮挡、点赞无反馈）。
+- 确认可复现设备矩阵：iPhone 16 模拟器 + 1 台真机。
+
+### Phase 1 - Drawer Layout and Safe Area
+
+- 在 `MediaZoomPagerView` 统一注入顶部/底部安全区。
+- `MetadataDrawer` 改为“内容高度 + 底部 inset”容器，确保贴底。
+- 抽屉外观使用顶部圆角，底部零圆角，消除底部缝隙。
+
+### Phase 2 - Close Button Placement and Layering
+
+- 关闭按钮位置由父容器安全区驱动，不再依赖局部状态推断。
+- 按钮提升层级，确保不被抽屉或图片层遮挡。
+- 校验拖拽中 `allowsHitTesting` 不误禁用关闭按钮。
+
+### Phase 3 - Like Feedback and Concurrency Safety
+
+- `MediaLikeViewModel` 输出 `errorMessage`，并保留 `isLoading` 可观测状态。
+- 加入请求上下文保护，避免旧请求回写新图片状态。
+- 抽屉心形按钮展示 loading、失败文案并禁止重复点击。
+
+### Phase 4 - Verification and Regression Gate
+
+- 运行 `xcodebuild build` 与 `xcodebuild test`。
+- 按 US1~US3 场景进行手工验收。
+- 回归检查：左右翻页、抽屉三段拖拽、下拉关闭。
+
+## Risk and Mitigation
+
+- **风险**: 抽屉高度与安全区叠加后导致拖拽锚点错位。  
+  **缓解**: 将锚点定义为“内容高度”，容器额外叠加 `bottomInset`。
+- **风险**: 按钮层级上调后影响图片手势区域。  
+  **缓解**: 按钮区域最小化并只在顶部左侧生效。
+- **风险**: 点赞请求并发造成 UI 状态闪回。  
+  **缓解**: 使用 `latestRequestID` 仅允许最新请求落状态。
+
+## Complexity Tracking
+
+| Violation | Why Needed | Simpler Alternative Rejected Because |
+|-----------|------------|-------------------------------------|
+| None | N/A | N/A |
+

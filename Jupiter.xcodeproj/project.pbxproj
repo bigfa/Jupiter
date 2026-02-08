@@ -60,12 +60,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		9B5D2A262F3831D7007FEABB /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				C4A100022F36000100320872 /* XCTest.framework */,
+			);
+			name = "Recovered References";
+			sourceTree = "<group>";
+		};
 		9BD6C30E2F3467C300320871 = {
 			isa = PBXGroup;
 			children = (
 				9BD6C3192F3467C300320871 /* Jupiter */,
 				C4A100032F36000100320872 /* JupiterTests */,
 				9BD6C3182F3467C300320871 /* Products */,
+				9B5D2A262F3831D7007FEABB /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};

@@ -29,6 +29,8 @@ struct MediaZoomPagerView: View {
         GeometryReader { geometry in
             let mediumHeight = geometry.size.height * 0.45
             let expandedHeight = geometry.size.height * 0.88
+            let safeTopInset = geometry.safeAreaInsets.top
+            let safeBottomInset = geometry.safeAreaInsets.bottom
 
             ZStack(alignment: .bottom) {
                 TabView(selection: $selection) {
@@ -38,6 +40,7 @@ struct MediaZoomPagerView: View {
                             sheetHeight: sheetHeight,
                             collapsedHeight: collapsedHeight,
                             expandedHeight: expandedHeight,
+                            safeTopInset: safeTopInset,
                             isVerticalDragging: $isVerticalDragging,
                             onCollapseDrawer: { collapseDrawer() },
                             onClose: { handleClose() }
@@ -54,8 +57,10 @@ struct MediaZoomPagerView: View {
                     height: $sheetHeight,
                     collapsedHeight: collapsedHeight,
                     mediumHeight: mediumHeight,
-                    expandedHeight: expandedHeight
+                    expandedHeight: expandedHeight,
+                    bottomInset: safeBottomInset
                 )
+                .ignoresSafeArea(edges: .bottom)
             }
         }
         .ignoresSafeArea()
@@ -97,6 +102,7 @@ struct MediaZoomDetailPage: View {
     let sheetHeight: CGFloat
     let collapsedHeight: CGFloat
     let expandedHeight: CGFloat
+    let safeTopInset: CGFloat
     @Binding var isVerticalDragging: Bool
     let onCollapseDrawer: () -> Void
     let onClose: () -> Void
@@ -188,9 +194,10 @@ struct MediaZoomDetailPage: View {
                 }
                 .opacity(controlsOpacity)
                 .allowsHitTesting(!isDragging)
-                .padding(.top, max(proxy.safeAreaInsets.top, 24) + 8)
+                .padding(.top, max(safeTopInset, 24) + 20)
                 .padding(.leading, 16)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                .zIndex(10)
 
             }
             .ignoresSafeArea()
@@ -302,6 +309,7 @@ private struct MetadataDrawer: View {
     let collapsedHeight: CGFloat
     let mediumHeight: CGFloat
     let expandedHeight: CGFloat
+    let bottomInset: CGFloat
     @State private var dragStartHeight: CGFloat? = nil
     @State private var likeViewModel: MediaLikeViewModel?
 
@@ -311,18 +319,28 @@ private struct MetadataDrawer: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Drag indicator
-            Capsule()
-                .fill(Color.secondary.opacity(0.4))
-                .frame(width: 36, height: 5)
-                .padding(.top, 8)
-                .padding(.bottom, 8)
+            VStack(alignment: .leading, spacing: 10) {
+                Capsule()
+                    .fill(Color.secondary.opacity(0.4))
+                    .frame(width: 36, height: 5)
+                    .padding(.top, 8)
+                    .frame(maxWidth: .infinity)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        cycleHeight()
+                    }
 
-            VStack(alignment: .leading, spacing: 12) {
                 HStack {
-                    Text("Metadata")
-                        .font(.subheadline.weight(.semibold))
-                    Spacer()
+                    Button {
+                        cycleHeight()
+                    } label: {
+                        Text("Metadata")
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+
                     if let likeViewModel {
                         HStack(spacing: 8) {
                             if likeViewModel.likes > 0 {
@@ -333,32 +351,57 @@ private struct MetadataDrawer: View {
                             Button {
                                 Task { await likeViewModel.toggle() }
                             } label: {
-                                Image(systemName: likeViewModel.liked ? "heart.fill" : "heart")
-                                    .font(.body)
-                                    .foregroundStyle(likeViewModel.liked ? .pink : .secondary)
+                                Group {
+                                    if likeViewModel.isLoading {
+                                        ProgressView()
+                                            .controlSize(.small)
+                                    } else {
+                                        Image(systemName: likeViewModel.liked ? "heart.fill" : "heart")
+                                            .font(.body)
+                                            .foregroundStyle(likeViewModel.liked ? .pink : .secondary)
+                                    }
+                                }
+                                .frame(width: 22, height: 22)
                             }
+                            .buttonStyle(.plain)
+                            .contentShape(Rectangle())
+                            .disabled(likeViewModel.isLoading)
                         }
                     }
                 }
+                .padding(.bottom, 2)
 
-                ScrollView(showsIndicators: false) {
-                    if let item {
-                        MediaItemInfoView(item: item)
-                            .padding(.top, 4)
-                    }
+                if let message = likeViewModel?.errorMessage, !message.isEmpty {
+                    Text(message)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                        .lineLimit(2)
                 }
-                .opacity(isExpanded ? 1 : 0)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 16)
+
+            ScrollView(showsIndicators: false) {
+                if let item {
+                    MediaItemInfoView(item: item)
+                        .padding(.top, 4)
+                }
+            }
+            .padding(.horizontal, 16)
+            .opacity(isExpanded ? 1 : 0)
 
             Spacer(minLength: 0)
         }
-        .frame(height: currentHeight)
+        .padding(.bottom, bottomInset)
+        .frame(height: currentHeight + bottomInset)
         .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .clipShape(
+            UnevenRoundedRectangle(
+                cornerRadii: .init(topLeading: 22, bottomLeading: 0, bottomTrailing: 0, topTrailing: 22),
+                style: .continuous
+            )
+        )
         .gesture(
-            DragGesture(coordinateSpace: .global)
+            DragGesture(minimumDistance: 12, coordinateSpace: .global)
                 .onChanged { value in
                     if dragStartHeight == nil {
                         dragStartHeight = height
@@ -377,26 +420,17 @@ private struct MetadataDrawer: View {
                     }
                 }
         )
-        .onTapGesture {
-            let next: CGFloat
-            if abs(height - collapsedHeight) < 2 {
-                next = mediumHeight
-            } else if abs(height - mediumHeight) < 2 {
-                next = expandedHeight
-            } else {
-                next = collapsedHeight
-            }
-            withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
-                height = next
-            }
-        }
         .onAppear {
             height = nearestAnchor(to: height)
         }
         .task(id: item?.id) {
-            guard let item else { return }
+            guard let item else {
+                likeViewModel = nil
+                return
+            }
             let vm = MediaLikeViewModel(mediaId: item.id)
             likeViewModel = vm
+            vm.clearError()
             await vm.load()
         }
     }
@@ -407,5 +441,19 @@ private struct MetadataDrawer: View {
 
     private func nearestAnchor(to value: CGFloat) -> CGFloat {
         anchors.min(by: { abs($0 - value) < abs($1 - value) }) ?? collapsedHeight
+    }
+
+    private func cycleHeight() {
+        let next: CGFloat
+        if abs(height - collapsedHeight) < 2 {
+            next = mediumHeight
+        } else if abs(height - mediumHeight) < 2 {
+            next = expandedHeight
+        } else {
+            next = collapsedHeight
+        }
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+            height = next
+        }
     }
 }
