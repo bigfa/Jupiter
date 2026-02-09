@@ -159,7 +159,7 @@ description: "Task list for 媒体详情交互收尾优化"
 - [x] T061 [US1] ~~在 `/Users/rich/Projects/Jupiter/Jupiter/Views/MediaZoomPagerView.swift` 将抽屉展开时的图片缩放改为裁切方案~~
   > **已废弃**：`.frame(proxy.size) + .clipped()` 方案导致图片定位完全错误（T065），已回退。仅保留删除 `sheetScale` 和简化 `imageScale` 的部分。
 
-- [ ] T065 [US1] **[回归 Bug]** 在 `/Users/rich/Projects/Jupiter/Jupiter/Views/MediaZoomPagerView.swift` 回退 T061 的 `.frame() + .clipped()` 方案，恢复原始定位链：
+- [x] T065 [US1] **[回归 Bug]** 在 `/Users/rich/Projects/Jupiter/Jupiter/Views/MediaZoomPagerView.swift` 回退 T061 的 `.frame() + .clipped()` 方案，恢复原始定位链：
   ```
   .frame(width: imageRect.width, height: imageRect.height)
   .position(x: imageRect.midX, y: imageRect.midY)
@@ -170,7 +170,7 @@ description: "Task list for 媒体详情交互收尾优化"
 
 ### Verification
 
-- [ ] T062 执行 `xcodebuild build` 确认编译通过（T065 回退后需重新验证）
+- [x] T062 执行 `xcodebuild build` 确认编译通过（T065 回退后需重新验证）
 - [ ] T063 [manual] 验证：下拉图片时仅图片移动，背景层静止不动
 - [ ] T064 [manual] 验证：抽屉三态展开时图片两侧始终贴边，无右偏
 - [ ] T066 [manual] 验证：点击查看大图时所有图片定位正确，无错位或不可见
@@ -211,14 +211,12 @@ description: "Task list for 媒体详情交互收尾优化"
 
 ## Remaining Work Summary
 
-已完成任务：T001, T003-T005, T010-T014, T020-T023, T025, T030-T035, T040-T041, T043, T050-T053, T060
+已完成任务：T001, T003-T005, T010-T014, T020-T023, T025, T030-T035, T040-T041, T043, T050-T053, T060, T062, T065
 
-待办任务（共 7 项）：
+待办任务（共 5 项）：
 
 | 任务 | 类型 | 优先级 | 说明 |
 |------|------|--------|------|
-| T065 | bug fix | **P0** | 回退 `.frame()+.clipped()` 恢复原始定位链 |
-| T062 | build | P1 | 编译验证（T065 后重新执行） |
 | T063 | manual | P1 | 验证背景不随图片移动 |
 | T064 | manual | P1 | 验证图片两侧贴边无右偏 |
 | T066 | manual | P1 | 验证图片定位正确无错位 |
