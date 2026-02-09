@@ -96,6 +96,55 @@ final class APIClientTests: XCTestCase {
         }
     }
 
+    func testMediaLikeUsesPostWithJSONBodyAndContentType() async throws {
+        let service = MediaService(client: makeClient())
+        URLProtocolStub.requestHandler = { request in
+            XCTAssertEqual(request.httpMethod, "POST")
+            XCTAssertEqual(request.url?.path, "/api/media/m_9/like")
+            XCTAssertEqual(request.value(forHTTPHeaderField: "Content-Type"), "application/json")
+
+            let body = try XCTUnwrap(request.bodyData())
+            let payload = try JSONSerialization.jsonObject(with: body) as? [String: Any]
+            XCTAssertEqual(payload?["action"] as? String, "like")
+
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: nil
+            )!
+            return (response, Data("{\"ok\":true,\"likes\":9,\"liked\":true}".utf8))
+        }
+
+        let result = try await service.likeMedia(id: "m_9")
+        XCTAssertTrue(result.ok)
+        XCTAssertEqual(result.likes, 9)
+        XCTAssertTrue(result.liked)
+    }
+
+    func testMediaUnlikeUsesDeleteWithNoRequestBody() async throws {
+        let service = MediaService(client: makeClient())
+        URLProtocolStub.requestHandler = { request in
+            XCTAssertEqual(request.httpMethod, "DELETE")
+            XCTAssertEqual(request.url?.path, "/api/media/m_9/like")
+            XCTAssertNil(request.httpBody)
+            XCTAssertNil(request.bodyData())
+
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: nil
+            )!
+            return (response, Data("{\"ok\":true,\"likes\":8,\"liked\":false}".utf8))
+        }
+
+        let result = try await service.unlikeMedia(id: "m_9")
+        XCTAssertTrue(result.ok)
+        XCTAssertEqual(result.likes, 8)
+        XCTAssertFalse(result.liked)
+    }
+
     private func makeClient() -> APIClient {
         let config = URLSessionConfiguration.ephemeral
         config.protocolClasses = [URLProtocolStub.self]
@@ -109,64 +158,4 @@ private struct OKResponse: Decodable {
 
 private struct UnlockBody: Encodable {
     let password: String
-}
-
-private final class URLProtocolStub: URLProtocol {
-    static var requestHandler: ((URLRequest) throws -> (HTTPURLResponse, Data))?
-
-    override class func canInit(with request: URLRequest) -> Bool {
-        true
-    }
-
-    override class func canonicalRequest(for request: URLRequest) -> URLRequest {
-        request
-    }
-
-    override func startLoading() {
-        guard let handler = URLProtocolStub.requestHandler else {
-            fatalError("requestHandler was not set.")
-        }
-
-        do {
-            let (response, data) = try handler(request)
-            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-            client?.urlProtocol(self, didLoad: data)
-            client?.urlProtocolDidFinishLoading(self)
-        } catch {
-            client?.urlProtocol(self, didFailWithError: error)
-        }
-    }
-
-    override func stopLoading() {}
-}
-
-private extension URLRequest {
-    func bodyData() -> Data? {
-        if let httpBody {
-            return httpBody
-        }
-        guard let stream = httpBodyStream else {
-            return nil
-        }
-
-        stream.open()
-        defer { stream.close() }
-
-        let bufferSize = 1024
-        var data = Data()
-        let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
-        defer { buffer.deallocate() }
-
-        while stream.hasBytesAvailable {
-            let read = stream.read(buffer, maxLength: bufferSize)
-            if read < 0 {
-                return nil
-            }
-            if read == 0 {
-                break
-            }
-            data.append(buffer, count: read)
-        }
-        return data
-    }
 }

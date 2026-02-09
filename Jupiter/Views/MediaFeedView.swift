@@ -4,6 +4,7 @@ struct MediaFeedView: View {
     @Binding var rootSelection: RootSection
     @StateObject private var viewModel = MediaFeedViewModel()
     @Namespace private var heroNamespace
+    @State private var selectedMediaForFullscreen: MediaItem? = nil
 
     private let spacing: CGFloat = 6
 
@@ -39,7 +40,9 @@ struct MediaFeedView: View {
                                             columnCount: viewModel.items.count == 1 ? 1 : columnCountValue,
                                             spacing: spacing
                                         ) { item in
-                                            NavigationLink(value: item) {
+                                            Button {
+                                                selectedMediaForFullscreen = item
+                                            } label: {
                                                 thumbnailView(for: item)
                                                     .task {
                                                         await viewModel.loadMoreIfNeeded(current: item)
@@ -64,7 +67,9 @@ struct MediaFeedView: View {
                                                     columnCount: section.items.count == 1 ? 1 : columnCountValue,
                                                     spacing: spacing
                                                 ) { item in
-                                                    NavigationLink(value: item) {
+                                                    Button {
+                                                        selectedMediaForFullscreen = item
+                                                    } label: {
                                                         thumbnailView(for: item)
                                                             .task {
                                                                 await viewModel.loadMoreIfNeeded(current: item)
@@ -160,13 +165,16 @@ struct MediaFeedView: View {
                         await viewModel.loadInitial(preserveItems: false)
                     }
                 }
-                .navigationDestination(for: MediaItem.self) { item in
-                    MediaZoomPagerView(
-                        items: viewModel.items,
-                        startId: item.id,
-                        namespace: heroNamespace
-                    ) {
-                        Task { await viewModel.loadNextPageIfPossible() }
+                .fullScreenCover(item: $selectedMediaForFullscreen) { item in
+                    ZStack {
+                        Color.black.ignoresSafeArea()
+                        MediaZoomPagerView(
+                            items: viewModel.items,
+                            startId: item.id,
+                            namespace: heroNamespace
+                        ) {
+                            Task { await viewModel.loadNextPageIfPossible() }
+                        }
                     }
                 }
             }

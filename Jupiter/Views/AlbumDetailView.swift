@@ -90,12 +90,15 @@ struct AlbumDetailView: View {
             AlbumCommentsSheet(viewModel: commentsViewModel)
         }
         .fullScreenCover(item: $selectedMediaForFullscreen) { item in
-            MediaZoomPagerView(
-                items: viewModel.media,
-                startId: item.id,
-                namespace: heroNamespace
-            ) {
-                Task { await viewModel.loadNextPageIfPossible() }
+            ZStack {
+                Color.black.ignoresSafeArea()
+                MediaZoomPagerView(
+                    items: viewModel.media,
+                    startId: item.id,
+                    namespace: heroNamespace
+                ) {
+                    Task { await viewModel.loadNextPageIfPossible() }
+                }
             }
         }
     }

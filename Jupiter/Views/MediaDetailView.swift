@@ -8,11 +8,13 @@ struct MediaDetailView: View {
     let preview: MediaItem?
 
     @StateObject private var viewModel: MediaDetailViewModel
+    @State private var likeViewModel: MediaLikeViewModel
 
     init(mediaId: String, preview: MediaItem? = nil) {
         self.mediaId = mediaId
         self.preview = preview
         _viewModel = StateObject(wrappedValue: MediaDetailViewModel(mediaId: mediaId))
+        _likeViewModel = State(initialValue: MediaLikeViewModel(mediaId: mediaId))
     }
 
     private var displayImageURL: URL? {
@@ -82,6 +84,22 @@ struct MediaDetailView: View {
                         showZoom = true
                     }
 
+                HStack(spacing: 12) {
+                    Button {
+                        Task { await likeViewModel.toggle() }
+                    } label: {
+                        Label(likeViewModel.liked ? "已赞" : "点赞", systemImage: likeViewModel.liked ? "heart.fill" : "heart")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(likeViewModel.liked ? .pink : .accentColor)
+
+                    if likeViewModel.likes > 0 {
+                        Text("♥︎ \(likeViewModel.likes)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
                 if let media = viewModel.media {
                     MediaDetailInfoView(media: media)
                 } else if preview == nil, let message = viewModel.errorMessage {
@@ -99,6 +117,7 @@ struct MediaDetailView: View {
             if viewModel.media == nil && !viewModel.isLoading {
                 await viewModel.load()
             }
+            await likeViewModel.load()
         }
         .overlay {
             if viewModel.isLoading {
