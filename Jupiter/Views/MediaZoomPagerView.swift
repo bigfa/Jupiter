@@ -5,7 +5,6 @@ struct MediaZoomPagerView: View {
     let items: [MediaItem]
     let namespace: Namespace.ID
     @State private var selection: Int
-    @State private var transitionId: String
     let onReachEnd: (() -> Void)?
 
     @Environment(\.dismiss) private var dismiss
@@ -19,11 +18,6 @@ struct MediaZoomPagerView: View {
         self.onReachEnd = onReachEnd
         let startIndex = items.firstIndex(where: { $0.id == startId }) ?? 0
         _selection = State(initialValue: startIndex)
-        if items.indices.contains(startIndex) {
-            _transitionId = State(initialValue: items[startIndex].id)
-        } else {
-            _transitionId = State(initialValue: startId)
-        }
     }
 
     var body: some View {
@@ -71,9 +65,6 @@ struct MediaZoomPagerView: View {
         }
         .ignoresSafeArea()
         .onChange(of: selection) { _, newIndex in
-            if items.indices.contains(newIndex) {
-                transitionId = items[newIndex].id
-            }
             if newIndex >= items.count - 2 {
                 onReachEnd?()
             }
@@ -84,7 +75,6 @@ struct MediaZoomPagerView: View {
         .toolbar(.hidden, for: .tabBar)
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
-        .navigationTransition(.zoom(sourceID: transitionId, in: namespace))
         .background {
             Color.black.ignoresSafeArea()
         }
@@ -151,11 +141,6 @@ struct MediaZoomDetailPage: View {
         -min(sheetProgress * (expandedHeight - collapsedHeight) * 0.35, 170)
     }
 
-    // 图片缩放
-    private var sheetScale: CGFloat {
-        1.0 - sheetProgress * 0.08
-    }
-
     private var dragProgress: CGFloat {
         min(abs(dragOffset.height) / 300, 1.0)
     }
@@ -173,7 +158,7 @@ struct MediaZoomDetailPage: View {
     }
 
     private var imageScale: CGFloat {
-        (1.0 - dragProgress * 0.08) * sheetScale
+        1.0 - dragProgress * 0.08
     }
 
     private var controlsOpacity: Double {
@@ -222,7 +207,10 @@ struct MediaZoomDetailPage: View {
                 )
                 .frame(width: imageRect.width, height: imageRect.height)
                 .position(x: imageRect.midX, y: imageRect.midY)
-                .offset(x: dragOffset.width, y: dragOffset.height + imageOffsetY)
+                .offset(y: imageOffsetY)
+                .frame(width: proxy.size.width, height: proxy.size.height)
+                .clipped()
+                .offset(x: dragOffset.width, y: dragOffset.height)
                 .scaleEffect(imageScale)
                 .contentShape(Rectangle())
                 .simultaneousGesture(dragGesture)

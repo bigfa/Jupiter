@@ -153,10 +153,10 @@ description: "Task list for 媒体详情交互收尾优化"
 
 ### Bug Fix
 
-- [ ] T060 [US1/US2] 在 `/Users/rich/Projects/Jupiter/Jupiter/Views/MediaZoomPagerView.swift` 删除 `.navigationTransition(.zoom(sourceID: transitionId, in: namespace))`（第 87 行）
+- [x] T060 [US1/US2] 在 `/Users/rich/Projects/Jupiter/Jupiter/Views/MediaZoomPagerView.swift` 删除 `.navigationTransition(.zoom(sourceID: transitionId, in: namespace))`（第 87 行）
   > 原因：该 API 为 NavigationStack push 转场设计，当前页面已改用 `fullScreenCover`，但残留的修饰符安装了系统级交互关闭手势，导致整个视图（背景+图片+抽屉）被系统拖动，与自定义 `DragGesture` 的 `dragOffset` 叠加后背景和图片以不同 offset 分离移动
 
-- [ ] T061 [US1] 在 `/Users/rich/Projects/Jupiter/Jupiter/Views/MediaZoomPagerView.swift` 将抽屉展开时的图片缩放改为裁切方案：
+- [x] T061 [US1] 在 `/Users/rich/Projects/Jupiter/Jupiter/Views/MediaZoomPagerView.swift` 将抽屉展开时的图片缩放改为裁切方案：
   1. 删除 `sheetScale` 计算属性
   2. `imageScale` 仅保留拖拽关闭缩放：`1.0 - dragProgress * 0.08`
   3. 将 `imageOffsetY`（抽屉推动上移）在 `.clipped()` 之前应用，`dragOffset`（下拉关闭位移）在 `.clipped()` 之后应用
@@ -165,7 +165,7 @@ description: "Task list for 媒体详情交互收尾优化"
 
 ### Verification
 
-- [ ] T062 执行 `xcodebuild build` 确认编译通过
+- [x] T062 执行 `xcodebuild build` 确认编译通过
 - [ ] T063 [manual] 验证：下拉图片时仅图片移动，背景层静止不动
 - [ ] T064 [manual] 验证：抽屉三态展开时图片两侧始终贴边，无右偏
 
@@ -205,15 +205,12 @@ description: "Task list for 媒体详情交互收尾优化"
 
 ## Remaining Work Summary
 
-已完成任务：T001, T003-T005, T010-T014, T020-T023, T025, T030-T035, T040-T041, T043, T050-T053
+已完成任务：T001, T003-T005, T010-T014, T020-T023, T025, T030-T035, T040-T041, T043, T050-T053, T060-T062
 
-待办任务（共 7 项）：
+待办任务（共 4 项）：
 
 | 任务 | 类型 | 优先级 | 说明 |
 |------|------|--------|------|
-| T060 | bug fix | P1 | 删除 `.navigationTransition(.zoom(...))` 修复背景移动 |
-| T061 | bug fix | P1 | 图片缩放改裁切方案，消除右偏 |
-| T062 | build | P1 | 编译验证 |
 | T063 | manual | P1 | 验证背景不随图片移动 |
 | T064 | manual | P1 | 验证图片两侧贴边无右偏 |
 | T002 | manual | P3 | 基线截图 |
