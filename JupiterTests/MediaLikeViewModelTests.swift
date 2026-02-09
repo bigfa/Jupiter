@@ -97,6 +97,30 @@ final class MediaLikeViewModelTests: XCTestCase {
         XCTAssertFalse(viewModel.isLoading)
     }
 
+    @MainActor
+    func testLoadFailureFromInitialStateSetsErrorAndResetsLoading() async {
+        MediaLikeURLProtocolStub.requestHandler = { request in
+            XCTAssertEqual(request.httpMethod, "GET")
+            XCTAssertEqual(request.url?.path, "/api/media/m_4/like")
+
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 500,
+                httpVersion: nil,
+                headerFields: nil
+            )!
+            return (response, Data("{\"ok\":false,\"error\":\"Server busy\"}".utf8))
+        }
+
+        let viewModel = MediaLikeViewModel(mediaId: "m_4", service: makeService())
+        await viewModel.load()
+
+        XCTAssertEqual(viewModel.errorMessage, "Server busy")
+        XCTAssertEqual(viewModel.likes, 0)
+        XCTAssertFalse(viewModel.liked)
+        XCTAssertFalse(viewModel.isLoading)
+    }
+
     private func makeService() -> MediaService {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [MediaLikeURLProtocolStub.self]

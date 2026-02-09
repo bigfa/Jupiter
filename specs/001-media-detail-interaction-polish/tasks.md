@@ -23,7 +23,7 @@ description: "Task list for 媒体详情交互收尾优化"
 
 **Purpose**: 对齐实现边界与验收基线
 
-- [ ] T001 建立手工验收清单文件骨架与全局条目到 `/Users/rich/Projects/Jupiter/specs/001-media-detail-interaction-polish/quickstart.md`（包含 US1~US3 章节标题与通用前置条件，各故事细节由 T010/T020/T025 填充）
+- [x] T001 建立手工验收清单文件骨架与全局条目到 `/Users/rich/Projects/Jupiter/specs/001-media-detail-interaction-polish/quickstart.md`（包含 US1~US3 章节标题与通用前置条件，各故事细节由 T010/T020/T025 填充）
 - [ ] T002 [manual] 记录基线问题截图与复现条件（模拟器 + 真机）到 `/Users/rich/Projects/Jupiter/specs/001-media-detail-interaction-polish/quickstart.md`
 
 ---
@@ -49,7 +49,7 @@ description: "Task list for 媒体详情交互收尾优化"
 
 ### Tests for User Story 1
 
-- [ ] T010 [US1] 在 `/Users/rich/Projects/Jupiter/specs/001-media-detail-interaction-polish/quickstart.md` 的 US1 章节填写 Given/When/Then 手工验收步骤
+- [x] T010 [US1] 在 `/Users/rich/Projects/Jupiter/specs/001-media-detail-interaction-polish/quickstart.md` 的 US1 章节填写 Given/When/Then 手工验收步骤
 
 ### Implementation for User Story 1
 
@@ -59,7 +59,7 @@ description: "Task list for 媒体详情交互收尾优化"
   > 已实现：`UnevenRoundedRectangle(cornerRadii: .init(topLeading: 22, bottomLeading: 0, bottomTrailing: 0, topTrailing: 22))`
 - [x] T013 [US1] 在 `/Users/rich/Projects/Jupiter/Jupiter/Views/MediaZoomPagerView.swift` 校正三段锚点计算，避免因 inset 叠加产生视觉错位
   > 已实现：锚点基于内容高度（`collapsedHeight/mediumHeight/expandedHeight`），`bottomInset` 在容器层独立叠加
-- [ ] T014 [US1] 在 `/Users/rich/Projects/Jupiter/Jupiter/Views/MediaZoomPagerView.swift` 覆盖 `bottomInset == 0` 设备的兜底行为
+- [x] T014 [US1] 在 `/Users/rich/Projects/Jupiter/Jupiter/Views/MediaZoomPagerView.swift` 覆盖 `bottomInset == 0` 设备的兜底行为
 
 **Checkpoint**: US1 可独立验收通过
 
@@ -72,7 +72,7 @@ description: "Task list for 媒体详情交互收尾优化"
 
 ### Tests for User Story 2
 
-- [ ] T020 [US2] 在 `/Users/rich/Projects/Jupiter/specs/001-media-detail-interaction-polish/quickstart.md` 的 US2 章节填写机型与场景验收步骤
+- [x] T020 [US2] 在 `/Users/rich/Projects/Jupiter/specs/001-media-detail-interaction-polish/quickstart.md` 的 US2 章节填写机型与场景验收步骤
 
 ### Implementation for User Story 2
 
@@ -94,9 +94,9 @@ description: "Task list for 媒体详情交互收尾优化"
 
 ### Tests for User Story 3
 
-- [ ] T025 [US3] 在 `/Users/rich/Projects/Jupiter/specs/001-media-detail-interaction-polish/quickstart.md` 的 US3 章节填写成功/失败场景手工验收步骤
-- [ ] T030 [P] [US3] 在 `/Users/rich/Projects/Jupiter/JupiterTests/MediaLikeViewModelTests.swift` 覆盖 toggle 成功、失败与 load 失败场景
-- [ ] T031 [P] [US3] 在 `/Users/rich/Projects/Jupiter/JupiterTests/APIClientTests.swift` 保持点赞请求 body/header 断言稳定
+- [x] T025 [US3] 在 `/Users/rich/Projects/Jupiter/specs/001-media-detail-interaction-polish/quickstart.md` 的 US3 章节填写成功/失败场景手工验收步骤
+- [x] T030 [P] [US3] 在 `/Users/rich/Projects/Jupiter/JupiterTests/MediaLikeViewModelTests.swift` 覆盖 toggle 成功、失败与 load 失败场景
+- [x] T031 [P] [US3] 在 `/Users/rich/Projects/Jupiter/JupiterTests/APIClientTests.swift` 保持点赞请求 body/header 断言稳定
 
 ### Implementation for User Story 3
 
@@ -117,10 +117,10 @@ description: "Task list for 媒体详情交互收尾优化"
 
 **Purpose**: 统一回归验证并收敛交付风险
 
-- [ ] T040 执行 `xcodebuild -project Jupiter.xcodeproj -scheme Jupiter -destination 'platform=iOS Simulator,name=iPhone 16' build`
-- [ ] T041 执行 `xcodebuild -project Jupiter.xcodeproj -scheme Jupiter -destination 'platform=iOS Simulator,name=iPhone 16' test`
+- [x] T040 执行 `xcodebuild -project Jupiter.xcodeproj -scheme Jupiter -destination 'platform=iOS Simulator,name=iPhone 16' build`
+- [x] T041 执行 `xcodebuild -project Jupiter.xcodeproj -scheme Jupiter -destination 'platform=iOS Simulator,name=iPhone 16' test`
 - [ ] T042 [manual] 按 `/Users/rich/Projects/Jupiter/specs/001-media-detail-interaction-polish/quickstart.md` 完成 US1~US3 手工回归
-- [ ] T043 更新 `/Users/rich/Projects/Jupiter/CHANGELOG.md` 记录本特性交付条目
+- [x] T043 更新 `/Users/rich/Projects/Jupiter/CHANGELOG.md` 记录本特性交付条目
 
 ---
 
@@ -155,19 +155,9 @@ description: "Task list for 媒体详情交互收尾优化"
 
 已完成实现任务：T003-T005, T011-T013, T021-T023, T032-T035（共 12 项）
 
-待办任务（共 11 项）：
+待办任务（共 2 项）：
 
 | 任务 | 类型 | 说明 |
 |------|------|------|
-| T001 | 文档 | 验收清单骨架 |
 | T002 | manual | 基线截图 |
-| T010 | 文档 | US1 验收步骤 |
-| T014 | 代码 | bottomInset == 0 兜底 |
-| T020 | 文档 | US2 验收步骤 |
-| T025 | 文档 | US3 验收步骤 |
-| T030 | 测试 | ViewModel 单测 |
-| T031 | 测试 | API 请求断言 |
-| T040 | 验证 | 构建 |
-| T041 | 验证 | 测试 |
 | T042 | manual | 手工回归 |
-| T043 | 文档 | CHANGELOG |

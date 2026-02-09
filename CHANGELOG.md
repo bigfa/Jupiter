@@ -11,6 +11,16 @@
   - `GET` 请求 query/header 组装与解码。
   - `POST` 请求 JSON body 与 `Content-Type`。
   - 非 2xx 响应的 `APIError` 解析。
+  - 媒体点赞接口 `POST/DELETE /api/media/{id}/like` 的 method/path/body 断言。
+- 新增 `MediaLikeViewModelTests` 场景覆盖：
+  - `toggle` 成功与失败反馈。
+  - `load` 首次失败与成功后失败的状态回归。
+
+### Changed
+- 媒体详情页 `Metadata` 抽屉增加 `bottomInset == 0` 兜底，保证贴底渲染连续。
+
+### Fixed
+- 修复媒体点赞“点击无反馈”问题：请求中 loading 可见、失败错误可见、切图回写受请求上下文保护。
 
 ## [0.0.1] - 2026-02-07
 

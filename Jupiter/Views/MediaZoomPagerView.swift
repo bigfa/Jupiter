@@ -316,6 +316,11 @@ private struct MetadataDrawer: View {
     private var currentHeight: CGFloat { height }
     private var anchors: [CGFloat] { [collapsedHeight, mediumHeight, expandedHeight] }
     private var isExpanded: Bool { height > collapsedHeight + 6 }
+    private var effectiveBottomInset: CGFloat {
+        // Some environments may report 0 bottom inset during transitions or on legacy devices.
+        // Keep a minimal inset so the drawer remains visually continuous and easy to grab.
+        bottomInset > 0 ? bottomInset : 8
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -391,8 +396,8 @@ private struct MetadataDrawer: View {
 
             Spacer(minLength: 0)
         }
-        .padding(.bottom, bottomInset)
-        .frame(height: currentHeight + bottomInset)
+        .padding(.bottom, effectiveBottomInset)
+        .frame(height: currentHeight + effectiveBottomInset)
         .background(.ultraThinMaterial)
         .clipShape(
             UnevenRoundedRectangle(

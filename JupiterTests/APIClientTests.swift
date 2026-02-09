@@ -96,6 +96,55 @@ final class APIClientTests: XCTestCase {
         }
     }
 
+    func testMediaLikeUsesPostWithJSONBodyAndContentType() async throws {
+        let service = MediaService(client: makeClient())
+        URLProtocolStub.requestHandler = { request in
+            XCTAssertEqual(request.httpMethod, "POST")
+            XCTAssertEqual(request.url?.path, "/api/media/m_9/like")
+            XCTAssertEqual(request.value(forHTTPHeaderField: "Content-Type"), "application/json")
+
+            let body = try XCTUnwrap(request.bodyData())
+            let payload = try JSONSerialization.jsonObject(with: body) as? [String: Any]
+            XCTAssertEqual(payload?["action"] as? String, "like")
+
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: nil
+            )!
+            return (response, Data("{\"ok\":true,\"likes\":9,\"liked\":true}".utf8))
+        }
+
+        let result = try await service.likeMedia(id: "m_9")
+        XCTAssertTrue(result.ok)
+        XCTAssertEqual(result.likes, 9)
+        XCTAssertTrue(result.liked)
+    }
+
+    func testMediaUnlikeUsesDeleteWithNoRequestBody() async throws {
+        let service = MediaService(client: makeClient())
+        URLProtocolStub.requestHandler = { request in
+            XCTAssertEqual(request.httpMethod, "DELETE")
+            XCTAssertEqual(request.url?.path, "/api/media/m_9/like")
+            XCTAssertNil(request.httpBody)
+            XCTAssertNil(request.bodyData())
+
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: nil
+            )!
+            return (response, Data("{\"ok\":true,\"likes\":8,\"liked\":false}".utf8))
+        }
+
+        let result = try await service.unlikeMedia(id: "m_9")
+        XCTAssertTrue(result.ok)
+        XCTAssertEqual(result.likes, 8)
+        XCTAssertFalse(result.liked)
+    }
+
     private func makeClient() -> APIClient {
         let config = URLSessionConfiguration.ephemeral
         config.protocolClasses = [URLProtocolStub.self]
