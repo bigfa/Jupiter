@@ -1,12 +1,13 @@
 import Foundation
-import Combine
+import Observation
 
 @MainActor
-final class MediaLikeViewModel: ObservableObject {
-    @Published private(set) var likes: Int = 0
-    @Published private(set) var liked = false
-    @Published private(set) var isLoading = false
-    @Published private(set) var errorMessage: String?
+@Observable
+final class MediaLikeViewModel {
+    private(set) var likes: Int = 0
+    private(set) var liked = false
+    private(set) var isLoading = false
+    private(set) var errorMessage: String?
 
     private let mediaId: String
     private let service: MediaService
@@ -67,10 +68,6 @@ final class MediaLikeViewModel: ObservableObject {
         if latestRequestID == requestID {
             isLoading = false
         }
-    }
-
-    func clearError() {
-        errorMessage = nil
     }
 
     private func readableMessage(from error: Error) -> String {

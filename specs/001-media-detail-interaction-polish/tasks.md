@@ -132,14 +132,14 @@ description: "Task list for 媒体详情交互收尾优化"
 
 ### Bug Fix
 
-- [ ] T050 [US3] 在 `/Users/rich/Projects/Jupiter/Jupiter/Views/MediaLikeViewModel.swift` 将 `MediaLikeViewModel` 从 `ObservableObject` 迁移至 `@Observable` 宏，并移除 `@Published` 属性包装器和 `ObservableObject` 协议。同步更新 `/Users/rich/Projects/Jupiter/Jupiter/Views/MediaZoomPagerView.swift` 中 `MetadataDrawer` 的 `@State private var likeViewModel` 声明（无需改为 `@StateObject`，`@Observable` + `@State` 即可正确工作）
+- [x] T050 [US3] 在 `/Users/rich/Projects/Jupiter/Jupiter/Views/MediaLikeViewModel.swift` 将 `MediaLikeViewModel` 从 `ObservableObject` 迁移至 `@Observable` 宏，并移除 `@Published` 属性包装器和 `ObservableObject` 协议。同步更新 `/Users/rich/Projects/Jupiter/Jupiter/Views/MediaZoomPagerView.swift` 中 `MetadataDrawer` 的 `@State private var likeViewModel` 声明（无需改为 `@StateObject`，`@Observable` + `@State` 即可正确工作）
   > 原因：当前 `@State` 持有 `ObservableObject` 不会订阅 `objectWillChange`，`@Published` 属性变化不触发视图重绘
 
 ### Improvements
 
-- [ ] T051 [P] 提取 `/Users/rich/Projects/Jupiter/JupiterTests/Helpers/URLProtocolStub.swift` 共享测试辅助类，替换 `APIClientTests.swift` 和 `MediaLikeViewModelTests.swift` 中的重复 `URLProtocolStub` / `MediaLikeURLProtocolStub`
-- [ ] T052 [P] [US3] 在 `/Users/rich/Projects/Jupiter/JupiterTests/MediaLikeViewModelTests.swift` 补充 `latestRequestID` 并发竞态测试：连续调用两次 `load()`，验证慢返回的第一次结果被丢弃
-- [ ] T053 [US3] 在 `/Users/rich/Projects/Jupiter/Jupiter/Views/MediaZoomPagerView.swift` 的 `.task(id: item?.id)` 中移除多余的 `vm.clearError()` 调用（`load()` 已内置 `errorMessage = nil`）
+- [x] T051 [P] 提取 `/Users/rich/Projects/Jupiter/JupiterTests/Helpers/URLProtocolStub.swift` 共享测试辅助类，替换 `APIClientTests.swift` 和 `MediaLikeViewModelTests.swift` 中的重复 `URLProtocolStub` / `MediaLikeURLProtocolStub`
+- [x] T052 [P] [US3] 在 `/Users/rich/Projects/Jupiter/JupiterTests/MediaLikeViewModelTests.swift` 补充 `latestRequestID` 并发竞态测试：连续调用两次 `load()`，验证慢返回的第一次结果被丢弃
+- [x] T053 [US3] 在 `/Users/rich/Projects/Jupiter/Jupiter/Views/MediaZoomPagerView.swift` 的 `.task(id: item?.id)` 中移除多余的 `vm.clearError()` 调用（`load()` 已内置 `errorMessage = nil`）
 
 **Checkpoint**: 所有 Code Review 问题已修复，`xcodebuild test` 通过
 
@@ -178,13 +178,9 @@ description: "Task list for 媒体详情交互收尾优化"
 
 已完成任务：T001, T003-T005, T010-T014, T020-T023, T025, T030-T035, T040-T041, T043
 
-待办任务（共 6 项）：
+待办任务（共 2 项）：
 
 | 任务 | 类型 | 优先级 | 说明 |
 |------|------|--------|------|
-| T050 | Bug 修复 | **P0** | `@State` + ObservableObject → `@Observable` 迁移 |
-| T051 | 重构 | P3 | 提取共享 URLProtocolStub 测试辅助 |
-| T052 | 测试 | P2 | 补充 latestRequestID 并发竞态测试 |
-| T053 | 清理 | P3 | 移除多余 clearError() 调用 |
 | T002 | manual | P3 | 基线截图 |
 | T042 | manual | P1 | 手工回归 |

@@ -4,17 +4,17 @@ import XCTest
 final class MediaLikeViewModelTests: XCTestCase {
     override func setUp() {
         super.setUp()
-        MediaLikeURLProtocolStub.requestHandler = nil
+        URLProtocolStub.requestHandler = nil
     }
 
     override func tearDown() {
-        MediaLikeURLProtocolStub.requestHandler = nil
+        URLProtocolStub.requestHandler = nil
         super.tearDown()
     }
 
     @MainActor
     func testToggleSuccessUpdatesLikeState() async throws {
-        MediaLikeURLProtocolStub.requestHandler = { request in
+        URLProtocolStub.requestHandler = { request in
             XCTAssertEqual(request.httpMethod, "POST")
             XCTAssertEqual(request.url?.path, "/api/media/m_1/like")
             let response = HTTPURLResponse(
@@ -37,7 +37,7 @@ final class MediaLikeViewModelTests: XCTestCase {
 
     @MainActor
     func testToggleFailureSetsErrorAndResetsLoading() async {
-        MediaLikeURLProtocolStub.requestHandler = { request in
+        URLProtocolStub.requestHandler = { request in
             XCTAssertEqual(request.httpMethod, "POST")
             let response = HTTPURLResponse(
                 url: request.url!,
@@ -59,11 +59,11 @@ final class MediaLikeViewModelTests: XCTestCase {
 
     @MainActor
     func testLoadSuccessThenFailurePreservesStateAndUpdatesError() async {
-        var callCount = 0
-        MediaLikeURLProtocolStub.requestHandler = { request in
+        let counter = RequestCounter()
+        URLProtocolStub.requestHandler = { request in
             XCTAssertEqual(request.httpMethod, "GET")
-            callCount += 1
-            if callCount == 1 {
+            let currentCall = await counter.next()
+            if currentCall == 1 {
                 let response = HTTPURLResponse(
                     url: request.url!,
                     statusCode: 200,
@@ -99,7 +99,7 @@ final class MediaLikeViewModelTests: XCTestCase {
 
     @MainActor
     func testLoadFailureFromInitialStateSetsErrorAndResetsLoading() async {
-        MediaLikeURLProtocolStub.requestHandler = { request in
+        URLProtocolStub.requestHandler = { request in
             XCTAssertEqual(request.httpMethod, "GET")
             XCTAssertEqual(request.url?.path, "/api/media/m_4/like")
 
@@ -121,39 +121,60 @@ final class MediaLikeViewModelTests: XCTestCase {
         XCTAssertFalse(viewModel.isLoading)
     }
 
+    @MainActor
+    func testLatestRequestWinsWhenTwoLoadRequestsRace() async throws {
+        let counter = RequestCounter()
+        URLProtocolStub.requestHandler = { request in
+            XCTAssertEqual(request.httpMethod, "GET")
+            let currentCall = await counter.next()
+
+            if currentCall == 1 {
+                try await Task.sleep(nanoseconds: 300_000_000)
+                let response = HTTPURLResponse(
+                    url: request.url!,
+                    statusCode: 200,
+                    httpVersion: nil,
+                    headerFields: nil
+                )!
+                return (response, Data("{\"ok\":true,\"likes\":1,\"liked\":false}".utf8))
+            } else {
+                let response = HTTPURLResponse(
+                    url: request.url!,
+                    statusCode: 200,
+                    httpVersion: nil,
+                    headerFields: nil
+                )!
+                return (response, Data("{\"ok\":true,\"likes\":99,\"liked\":true}".utf8))
+            }
+        }
+
+        let viewModel = MediaLikeViewModel(mediaId: "m_5", service: makeService())
+        let first = Task { await viewModel.load() }
+        try await Task.sleep(nanoseconds: 50_000_000)
+        let second = Task { await viewModel.load() }
+
+        await first.value
+        await second.value
+
+        XCTAssertEqual(viewModel.likes, 99)
+        XCTAssertTrue(viewModel.liked)
+        XCTAssertNil(viewModel.errorMessage)
+        XCTAssertFalse(viewModel.isLoading)
+    }
+
     private func makeService() -> MediaService {
         let configuration = URLSessionConfiguration.ephemeral
-        configuration.protocolClasses = [MediaLikeURLProtocolStub.self]
+        configuration.protocolClasses = [URLProtocolStub.self]
         let session = URLSession(configuration: configuration)
         return MediaService(client: APIClient(session: session))
     }
 }
 
-private final class MediaLikeURLProtocolStub: URLProtocol {
-    static var requestHandler: ((URLRequest) throws -> (HTTPURLResponse, Data))?
+private actor RequestCounter {
+    private var count = 0
 
-    override class func canInit(with request: URLRequest) -> Bool {
-        true
+    func next() -> Int {
+        count += 1
+        return count
     }
-
-    override class func canonicalRequest(for request: URLRequest) -> URLRequest {
-        request
-    }
-
-    override func startLoading() {
-        guard let handler = Self.requestHandler else {
-            fatalError("requestHandler must be set before starting URLProtocolStub.")
-        }
-
-        do {
-            let (response, data) = try handler(request)
-            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-            client?.urlProtocol(self, didLoad: data)
-            client?.urlProtocolDidFinishLoading(self)
-        } catch {
-            client?.urlProtocol(self, didFailWithError: error)
-        }
-    }
-
-    override func stopLoading() {}
 }

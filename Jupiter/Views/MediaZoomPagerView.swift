@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct MediaZoomPagerView: View {
     let items: [MediaItem]
@@ -27,12 +28,16 @@ struct MediaZoomPagerView: View {
 
     var body: some View {
         GeometryReader { geometry in
+            let windowInsets = UIApplication.currentKeyWindowSafeAreaInsets
+            let safeTopInset = max(geometry.safeAreaInsets.top, windowInsets.top)
+            let safeBottomInset = max(geometry.safeAreaInsets.bottom, windowInsets.bottom)
             let mediumHeight = geometry.size.height * 0.45
             let expandedHeight = geometry.size.height * 0.88
-            let safeTopInset = geometry.safeAreaInsets.top
-            let safeBottomInset = geometry.safeAreaInsets.bottom
 
             ZStack(alignment: .bottom) {
+                Color.black
+                    .ignoresSafeArea()
+
                 TabView(selection: $selection) {
                     ForEach(items.indices, id: \.self) { index in
                         MediaZoomDetailPage(
@@ -49,7 +54,8 @@ struct MediaZoomPagerView: View {
                     }
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
-                .background(Color.clear)
+                .background(Color.black)
+                .ignoresSafeArea()
                 .allowsHitTesting(!isVerticalDragging)
 
                 MetadataDrawer(
@@ -79,6 +85,9 @@ struct MediaZoomPagerView: View {
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .navigationTransition(.zoom(sourceID: transitionId, in: namespace))
+        .background {
+            Color.black.ignoresSafeArea()
+        }
     }
 
     private var currentItem: MediaItem? {
@@ -94,6 +103,17 @@ struct MediaZoomPagerView: View {
         withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
             sheetHeight = collapsedHeight
         }
+    }
+}
+
+private extension UIApplication {
+    static var currentKeyWindowSafeAreaInsets: UIEdgeInsets {
+        let scenes = shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+        let keyWindow = scenes
+            .flatMap(\.windows)
+            .first { $0.isKeyWindow }
+        return keyWindow?.safeAreaInsets ?? .zero
     }
 }
 
@@ -144,6 +164,14 @@ struct MediaZoomDetailPage: View {
         1.0 - Double(dragProgress)
     }
 
+    private var backgroundBlurRadius: CGFloat {
+        16 + dragProgress * 18
+    }
+
+    private var backgroundScale: CGFloat {
+        1.05 + dragProgress * 0.04
+    }
+
     private var imageScale: CGFloat {
         (1.0 - dragProgress * 0.08) * sheetScale
     }
@@ -165,9 +193,27 @@ struct MediaZoomDetailPage: View {
 
             ZStack(alignment: .bottom) {
                 // 背景层 - 不响应拖动
-                Color.white
+                if let backgroundURL = resolvedURL ?? bestURL {
+                    RemoteImage(
+                        url: backgroundURL,
+                        contentMode: .fill,
+                        fadeDuration: 0.15,
+                        showsProgress: false,
+                        disableAnimations: true
+                    )
+                    .blur(radius: backgroundBlurRadius)
+                    .saturation(0.94)
+                    .scaleEffect(backgroundScale)
+                    .overlay(Color.black.opacity(0.12))
                     .opacity(backgroundOpacity)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .ignoresSafeArea()
+                } else {
+                    Color.black
+                        .opacity(backgroundOpacity)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .ignoresSafeArea()
+                }
 
                 // 图片层 - 只有这里移动
                 ZoomableImageView(
@@ -317,9 +363,10 @@ private struct MetadataDrawer: View {
     private var anchors: [CGFloat] { [collapsedHeight, mediumHeight, expandedHeight] }
     private var isExpanded: Bool { height > collapsedHeight + 6 }
     private var effectiveBottomInset: CGFloat {
-        // Some environments may report 0 bottom inset during transitions or on legacy devices.
-        // Keep a minimal inset so the drawer remains visually continuous and easy to grab.
-        bottomInset > 0 ? bottomInset : 8
+        // Prefer dynamic safe area from either parent geometry or key window.
+        let windowBottom = UIApplication.currentKeyWindowSafeAreaInsets.bottom
+        let resolvedBottom = max(bottomInset, windowBottom)
+        return resolvedBottom > 0 ? resolvedBottom : 8
     }
 
     var body: some View {
@@ -435,7 +482,6 @@ private struct MetadataDrawer: View {
             }
             let vm = MediaLikeViewModel(mediaId: item.id)
             likeViewModel = vm
-            vm.clearError()
             await vm.load()
         }
     }

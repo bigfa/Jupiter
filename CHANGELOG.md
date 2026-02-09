@@ -15,9 +15,12 @@
 - 新增 `MediaLikeViewModelTests` 场景覆盖：
   - `toggle` 成功与失败反馈。
   - `load` 首次失败与成功后失败的状态回归。
+  - `latestRequestID` 并发竞态回归（连续两次 `load()`，慢请求结果丢弃）。
+- 新增共享测试辅助：`JupiterTests/Helpers/URLProtocolStub.swift`。
 
 ### Changed
 - 媒体详情页 `Metadata` 抽屉增加 `bottomInset == 0` 兜底，保证贴底渲染连续。
+- `MediaLikeViewModel` 迁移为 `@Observable`，统一 `@State` 持有方式，确保点赞状态变化可触发 UI 刷新。
 
 ### Fixed
 - 修复媒体点赞“点击无反馈”问题：请求中 loading 可见、失败错误可见、切图回写受请求上下文保护。

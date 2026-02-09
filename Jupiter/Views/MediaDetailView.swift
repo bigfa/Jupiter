@@ -8,13 +8,13 @@ struct MediaDetailView: View {
     let preview: MediaItem?
 
     @StateObject private var viewModel: MediaDetailViewModel
-    @StateObject private var likeViewModel: MediaLikeViewModel
+    @State private var likeViewModel: MediaLikeViewModel
 
     init(mediaId: String, preview: MediaItem? = nil) {
         self.mediaId = mediaId
         self.preview = preview
         _viewModel = StateObject(wrappedValue: MediaDetailViewModel(mediaId: mediaId))
-        _likeViewModel = StateObject(wrappedValue: MediaLikeViewModel(mediaId: mediaId))
+        _likeViewModel = State(initialValue: MediaLikeViewModel(mediaId: mediaId))
     }
 
     private var displayImageURL: URL? {
