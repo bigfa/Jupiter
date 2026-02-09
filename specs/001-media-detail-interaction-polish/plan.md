@@ -125,7 +125,8 @@ Code Review 发现的 Bug 与改进项：
 交互测试发现两个视觉问题，均在 `MediaZoomPagerView.swift` 中修复：
 
 - **[Bug] 背景层随图片一起位移**：`.navigationTransition(.zoom(sourceID:in:))` 是 `NavigationStack` push 转场 API，当前页面已改用 `fullScreenCover` 呈现，但该修饰符仍残留。它在 fullScreenCover 上安装了系统级交互关闭手势，下拉时系统把整个视图（背景+图片+按钮+抽屉）一起拖动；同时自定义 `DragGesture` 给图片额外叠加 `dragOffset`，导致背景和图片以不同 offset 分离移动。修复：删除 `.navigationTransition(.zoom(...))`，由自定义手势调用 `dismiss()` 完成关闭。
-- **[Bug] 抽屉展开时图片向右侧偏移缩放**：`sheetScale`（`1.0 - sheetProgress * 0.08`）通过 `.scaleEffect()` 缩放图片，但 `.position()` 后的视图中心与布局中心不一致，导致缩放后图片视觉右偏且两侧不再贴边。修复：删除 `sheetScale`，`imageScale` 仅保留拖拽关闭缩放（`1.0 - dragProgress * 0.08`）；抽屉展开时图片保持原始尺寸，通过 `imageOffsetY` 上移后用 `.clipped()` 裁切溢出部分实现视觉缩放效果。将 `imageOffsetY`（抽屉推动）和 `dragOffset`（下拉关闭）分层：前者在 `.clipped()` 之前应用，后者在之后应用。
+- **[Bug] 抽屉展开时图片向右侧偏移缩放**：`sheetScale`（`1.0 - sheetProgress * 0.08`）通过 `.scaleEffect()` 缩放图片，但 `.position()` 后的视图中心与布局中心不一致，导致缩放后图片视觉右偏且两侧不再贴边。修复：删除 `sheetScale`，`imageScale` 仅保留拖拽关闭缩放（`1.0 - dragProgress * 0.08`）。
+- **[Bug] 图片定位完全错误（T061 回归）**：T061 的 `.frame(proxy.size) + .clipped()` 方案在 `.position()` 和 ZStack 之间插入了固定尺寸约束，改变了 `.position()` 的坐标空间。原本 `.position()` 使用 ZStack（含 `.ignoresSafeArea()`）的全屏尺寸（852pt）作为坐标系，插入 `.frame(proxy.size)` 后改为 GeometryReader 的安全区内尺寸（759pt）。`imageRect.midY` 始终基于 `proxy.size` 计算，在全屏坐标系中偏上约 46px（可接受），但在缩小的坐标系中被 ZStack `.bottom` 对齐下移 93px。更严重的是，`fullScreenCover` 呈现动画期间 `proxy.size` 可能从 0 过渡到最终值，导致 `.frame(0, 0)` 瞬间把图片约束在零尺寸区域，部分图片只能看到一角、部分完全不可见。修复：**撤销 T061 的 `.frame() + .clipped()` 方案**，保持原始定位链不变，抽屉展开时图片上移溢出到状态栏后方是可接受的行为（底部被抽屉自然遮挡）。
 
 ## Risk and Mitigation
 
@@ -140,7 +141,9 @@ Code Review 发现的 Bug 与改进项：
 - **风险**: 删除 `.navigationTransition(.zoom(...))` 后失去 zoom 入场动画。
   **缓解**: 当前已使用 `fullScreenCover` 呈现，`.navigationTransition` 本身不提供 fullScreenCover 的 zoom 入场效果，仅安装了不需要的交互关闭手势，删除无副作用。
 - **风险**: 移除 `sheetScale` 后抽屉展开时图片无视觉退让。
-  **缓解**: 图片通过 `imageOffsetY` 上移 + `.clipped()` 裁切实现等效退让效果，且保持两侧贴边。
+  **缓解**: 图片通过 `imageOffsetY` 上移实现退让，溢出部分在状态栏后方不影响体验，底部由抽屉自然遮挡。
+- **风险**: 在 `.position()` 和 ZStack 之间插入 `.frame(proxy.size)` 改变坐标空间导致图片错位。
+  **缓解**: 放弃 `.frame() + .clipped()` 裁切方案，保持 `.position()` 直接在 ZStack 内的原始定位链，避免坐标空间不匹配。
 
 ## Complexity Tracking
 

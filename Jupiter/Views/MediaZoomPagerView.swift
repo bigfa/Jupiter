@@ -5,7 +5,6 @@ struct MediaZoomPagerView: View {
     let items: [MediaItem]
     let namespace: Namespace.ID
     @State private var selection: Int
-    @State private var transitionId: String
     let onReachEnd: (() -> Void)?
 
     @Environment(\.dismiss) private var dismiss
@@ -19,11 +18,6 @@ struct MediaZoomPagerView: View {
         self.onReachEnd = onReachEnd
         let startIndex = items.firstIndex(where: { $0.id == startId }) ?? 0
         _selection = State(initialValue: startIndex)
-        if items.indices.contains(startIndex) {
-            _transitionId = State(initialValue: items[startIndex].id)
-        } else {
-            _transitionId = State(initialValue: startId)
-        }
     }
 
     var body: some View {
@@ -47,6 +41,9 @@ struct MediaZoomPagerView: View {
                             expandedHeight: expandedHeight,
                             safeTopInset: safeTopInset,
                             isVerticalDragging: $isVerticalDragging,
+                            onHorizontalSwipe: { direction in
+                                handleHorizontalSwipe(direction)
+                            },
                             onCollapseDrawer: { collapseDrawer() },
                             onClose: { handleClose() }
                         )
@@ -71,9 +68,6 @@ struct MediaZoomPagerView: View {
         }
         .ignoresSafeArea()
         .onChange(of: selection) { _, newIndex in
-            if items.indices.contains(newIndex) {
-                transitionId = items[newIndex].id
-            }
             if newIndex >= items.count - 2 {
                 onReachEnd?()
             }
@@ -84,7 +78,6 @@ struct MediaZoomPagerView: View {
         .toolbar(.hidden, for: .tabBar)
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
-        .navigationTransition(.zoom(sourceID: transitionId, in: namespace))
         .background {
             Color.black.ignoresSafeArea()
         }
@@ -102,6 +95,20 @@ struct MediaZoomPagerView: View {
     private func collapseDrawer() {
         withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
             sheetHeight = collapsedHeight
+        }
+    }
+
+    private func handleHorizontalSwipe(_ direction: SwipeDirection) {
+        let targetIndex: Int
+        switch direction {
+        case .previous:
+            targetIndex = selection - 1
+        case .next:
+            targetIndex = selection + 1
+        }
+        guard items.indices.contains(targetIndex) else { return }
+        withAnimation(.easeInOut(duration: 0.22)) {
+            selection = targetIndex
         }
     }
 }
@@ -124,6 +131,7 @@ struct MediaZoomDetailPage: View {
     let expandedHeight: CGFloat
     let safeTopInset: CGFloat
     @Binding var isVerticalDragging: Bool
+    let onHorizontalSwipe: (SwipeDirection) -> Void
     let onCollapseDrawer: () -> Void
     let onClose: () -> Void
 
@@ -151,11 +159,6 @@ struct MediaZoomDetailPage: View {
         -min(sheetProgress * (expandedHeight - collapsedHeight) * 0.35, 170)
     }
 
-    // 图片缩放
-    private var sheetScale: CGFloat {
-        1.0 - sheetProgress * 0.08
-    }
-
     private var dragProgress: CGFloat {
         min(abs(dragOffset.height) / 300, 1.0)
     }
@@ -173,11 +176,15 @@ struct MediaZoomDetailPage: View {
     }
 
     private var imageScale: CGFloat {
-        (1.0 - dragProgress * 0.08) * sheetScale
+        1.0 - dragProgress * 0.08
     }
 
     private var controlsOpacity: Double {
         max(0, 1.0 - Double(dragProgress) * 1.2)
+    }
+
+    private var closeButtonTopPadding: CGFloat {
+        safeTopInset > 0 ? safeTopInset + 24 : 56
     }
 
     private var isDragging: Bool {
@@ -240,7 +247,7 @@ struct MediaZoomDetailPage: View {
                 }
                 .opacity(controlsOpacity)
                 .allowsHitTesting(!isDragging)
-                .padding(.top, max(safeTopInset, 24) + 20)
+                .padding(.top, closeButtonTopPadding)
                 .padding(.leading, 16)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .zIndex(10)
@@ -279,12 +286,35 @@ struct MediaZoomDetailPage: View {
                 let axis = dragAxis
                 dragAxis = nil
                 isVerticalDragging = false
-                guard axis == .vertical, zoomScale <= 1.01 else {
+
+                guard zoomScale <= 1.01 else {
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                         dragOffset = .zero
                     }
                     return
                 }
+
+                if axis == .horizontal {
+                    let horizontalThreshold: CGFloat = 56
+                    let predictedThreshold: CGFloat = 120
+                    if value.translation.width < -horizontalThreshold || value.predictedEndTranslation.width < -predictedThreshold {
+                        onHorizontalSwipe(.next)
+                    } else if value.translation.width > horizontalThreshold || value.predictedEndTranslation.width > predictedThreshold {
+                        onHorizontalSwipe(.previous)
+                    }
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                        dragOffset = .zero
+                    }
+                    return
+                }
+
+                guard axis == .vertical else {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                        dragOffset = .zero
+                    }
+                    return
+                }
+
                 let isDownward = value.translation.height > 0 || value.predictedEndTranslation.height > 0
                 let closeThreshold: CGFloat = 100
                 let predictedThreshold: CGFloat = 300
@@ -326,6 +356,11 @@ struct MediaZoomDetailPage: View {
 private enum DragAxis {
     case vertical
     case horizontal
+}
+
+enum SwipeDirection {
+    case previous
+    case next
 }
 
 private struct MediaZoomPagerPreviewWrapper: View {
