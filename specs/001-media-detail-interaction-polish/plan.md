@@ -14,7 +14,7 @@
 
 ### Current Progress
 
-基础实现（Phase 0~3）已完成，剩余工作集中在验收文档、单元测试补齐和 `bottomInset == 0` 兜底。详见 `tasks.md` 的 Remaining Work Summary。
+基础实现（Phase 0~4）已完成，Code Review 发现一个 Bug 和若干改进项，已追加为 Phase 6。详见 `tasks.md` 的 Remaining Work Summary。
 
 ## Technical Context
 
@@ -97,28 +97,39 @@ JupiterTests/
 - 按钮提升层级（`.zIndex(10)`），确保不被抽屉或图片层遮挡。
 - 拖拽中 `.allowsHitTesting(!isDragging)` 不误禁用关闭按钮。
 
-### Phase 4 - US3: Like Feedback *(对应 tasks.md Phase 4)* 🔶 实现完成，待补测试
+### Phase 4 - US3: Like Feedback *(对应 tasks.md Phase 4)* ✅ 已完成
 
 - `MediaLikeViewModel` 输出 `errorMessage`，并保留 `isLoading` 可观测状态。✅
 - `latestRequestID` 请求上下文保护，避免旧请求回写新图片状态。✅
 - 抽屉心形按钮展示 loading、失败文案并禁止重复点击。✅
-- **待办**: 补充 `MediaLikeViewModelTests` 单元测试（T030）和 API 请求断言（T031）。
+- `MediaLikeViewModelTests` 单元测试 + API 请求断言。✅
 
 ### Phase 5 - Verification and Regression Gate *(对应 tasks.md Phase 5)*
 
-- 运行 `xcodebuild build` 与 `xcodebuild test`。
+- 运行 `xcodebuild build` 与 `xcodebuild test`。✅
 - 按 US1~US3 场景进行手工验收。
 - 回归检查：左右翻页、抽屉三段拖拽、下拉关闭。
-- 更新 CHANGELOG.md。
+- 更新 CHANGELOG.md。✅
+
+### Phase 6 - Code Review Fixes *(对应 tasks.md Phase 6)*
+
+Code Review 发现的 Bug 与改进项：
+
+- **[Bug]** `MetadataDrawer` 使用 `@State` 持有 `MediaLikeViewModel`（ObservableObject），`@Published` 属性变化不会触发视图重绘。需迁移至 `@Observable` 宏。
+- **[改进]** 提取 `URLProtocolStub` 为共享测试辅助，消除 `APIClientTests` 与 `MediaLikeViewModelTests` 之间的重复代码。
+- **[改进]** 补充 `latestRequestID` 并发竞态的单元测试。
+- **[改进]** 移除 `MetadataDrawer` 中 `.task(id:)` 内多余的 `vm.clearError()` 调用。
 
 ## Risk and Mitigation
 
-- **风险**: 抽屉高度与安全区叠加后导致拖拽锚点错位。  
-  **缓解**: 将锚点定义为“内容高度”，容器额外叠加 `bottomInset`。
-- **风险**: 按钮层级上调后影响图片手势区域。  
+- **风险**: 抽屉高度与安全区叠加后导致拖拽锚点错位。
+  **缓解**: 将锚点定义为"内容高度"，容器额外叠加 `bottomInset`。
+- **风险**: 按钮层级上调后影响图片手势区域。
   **缓解**: 按钮区域最小化并只在顶部左侧生效。
-- **风险**: 点赞请求并发造成 UI 状态闪回。  
+- **风险**: 点赞请求并发造成 UI 状态闪回。
   **缓解**: 使用 `latestRequestID` 仅允许最新请求落状态。
+- **风险**: `@State` 持有 ObservableObject 导致 `@Published` 变化不触发 UI 更新。
+  **缓解**: 迁移 `MediaLikeViewModel` 至 `@Observable` 宏，SwiftUI 自动追踪属性访问（T050）。
 
 ## Complexity Tracking
 

@@ -124,14 +124,36 @@ description: "Task list for 媒体详情交互收尾优化"
 
 ---
 
+## Phase 6: Code Review Fixes
+
+**Purpose**: 修复 Code Review 发现的 Bug 与改进项
+
+**⚠️ BUG**: T050 为阻塞性问题，点赞按钮 UI 可能不会实时更新
+
+### Bug Fix
+
+- [ ] T050 [US3] 在 `/Users/rich/Projects/Jupiter/Jupiter/Views/MediaLikeViewModel.swift` 将 `MediaLikeViewModel` 从 `ObservableObject` 迁移至 `@Observable` 宏，并移除 `@Published` 属性包装器和 `ObservableObject` 协议。同步更新 `/Users/rich/Projects/Jupiter/Jupiter/Views/MediaZoomPagerView.swift` 中 `MetadataDrawer` 的 `@State private var likeViewModel` 声明（无需改为 `@StateObject`，`@Observable` + `@State` 即可正确工作）
+  > 原因：当前 `@State` 持有 `ObservableObject` 不会订阅 `objectWillChange`，`@Published` 属性变化不触发视图重绘
+
+### Improvements
+
+- [ ] T051 [P] 提取 `/Users/rich/Projects/Jupiter/JupiterTests/Helpers/URLProtocolStub.swift` 共享测试辅助类，替换 `APIClientTests.swift` 和 `MediaLikeViewModelTests.swift` 中的重复 `URLProtocolStub` / `MediaLikeURLProtocolStub`
+- [ ] T052 [P] [US3] 在 `/Users/rich/Projects/Jupiter/JupiterTests/MediaLikeViewModelTests.swift` 补充 `latestRequestID` 并发竞态测试：连续调用两次 `load()`，验证慢返回的第一次结果被丢弃
+- [ ] T053 [US3] 在 `/Users/rich/Projects/Jupiter/Jupiter/Views/MediaZoomPagerView.swift` 的 `.task(id: item?.id)` 中移除多余的 `vm.clearError()` 调用（`load()` 已内置 `errorMessage = nil`）
+
+**Checkpoint**: 所有 Code Review 问题已修复，`xcodebuild test` 通过
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies
 
 - Setup (Phase 0) 无依赖，可立即开始
 - Foundational (Phase 1) 依赖 Setup，且阻塞所有用户故事 ✅ 已完成
-- User Stories (Phase 2~4) 依赖 Foundational 完成
+- User Stories (Phase 2~4) 依赖 Foundational 完成 ✅ 已完成
 - Polish (Phase 5) 依赖目标用户故事完成
+- Code Review Fixes (Phase 6) 可独立开始，T050 优先级最高
 
 ### User Story Dependencies
 
@@ -147,17 +169,22 @@ description: "Task list for 媒体详情交互收尾优化"
 
 ### Parallel Opportunities
 
-- T030 与 T031 可并行（不同测试文件）
+- T051 与 T052 可并行（不同文件、不同关注点）
+- T050 完成后方可运行 T052 的测试验证
 
 ---
 
 ## Remaining Work Summary
 
-已完成实现任务：T003-T005, T011-T013, T021-T023, T032-T035（共 12 项）
+已完成任务：T001, T003-T005, T010-T014, T020-T023, T025, T030-T035, T040-T041, T043
 
-待办任务（共 2 项）：
+待办任务（共 6 项）：
 
-| 任务 | 类型 | 说明 |
-|------|------|------|
-| T002 | manual | 基线截图 |
-| T042 | manual | 手工回归 |
+| 任务 | 类型 | 优先级 | 说明 |
+|------|------|--------|------|
+| T050 | Bug 修复 | **P0** | `@State` + ObservableObject → `@Observable` 迁移 |
+| T051 | 重构 | P3 | 提取共享 URLProtocolStub 测试辅助 |
+| T052 | 测试 | P2 | 补充 latestRequestID 并发竞态测试 |
+| T053 | 清理 | P3 | 移除多余 clearError() 调用 |
+| T002 | manual | P3 | 基线截图 |
+| T042 | manual | P1 | 手工回归 |
