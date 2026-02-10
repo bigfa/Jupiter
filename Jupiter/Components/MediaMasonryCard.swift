@@ -55,7 +55,22 @@ struct MediaMasonryCard_Previews: PreviewProvider {
             likes: 12,
             liked: false,
             datetimeOriginal: nil,
-            createdAt: nil
+            createdAt: nil,
+            filename: nil,
+            size: nil,
+            mimeType: nil,
+            cameraMake: nil,
+            cameraModel: nil,
+            lensModel: nil,
+            aperture: nil,
+            shutterSpeed: nil,
+            iso: nil,
+            focalLength: nil,
+            locationName: nil,
+            gpsLat: nil,
+            gpsLon: nil,
+            tags: nil,
+            categories: nil
         ))
         .padding()
     }

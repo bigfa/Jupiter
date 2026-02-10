@@ -41,9 +41,6 @@ struct MediaZoomPagerView: View {
                             expandedHeight: expandedHeight,
                             safeTopInset: safeTopInset,
                             isVerticalDragging: $isVerticalDragging,
-                            onHorizontalSwipe: { direction in
-                                handleHorizontalSwipe(direction)
-                            },
                             onCollapseDrawer: { collapseDrawer() },
                             onClose: { handleClose() }
                         )
@@ -97,20 +94,6 @@ struct MediaZoomPagerView: View {
             sheetHeight = collapsedHeight
         }
     }
-
-    private func handleHorizontalSwipe(_ direction: SwipeDirection) {
-        let targetIndex: Int
-        switch direction {
-        case .previous:
-            targetIndex = selection - 1
-        case .next:
-            targetIndex = selection + 1
-        }
-        guard items.indices.contains(targetIndex) else { return }
-        withAnimation(.easeInOut(duration: 0.22)) {
-            selection = targetIndex
-        }
-    }
 }
 
 private extension UIApplication {
@@ -131,7 +114,6 @@ struct MediaZoomDetailPage: View {
     let expandedHeight: CGFloat
     let safeTopInset: CGFloat
     @Binding var isVerticalDragging: Bool
-    let onHorizontalSwipe: (SwipeDirection) -> Void
     let onCollapseDrawer: () -> Void
     let onClose: () -> Void
 
@@ -294,20 +276,6 @@ struct MediaZoomDetailPage: View {
                     return
                 }
 
-                if axis == .horizontal {
-                    let horizontalThreshold: CGFloat = 56
-                    let predictedThreshold: CGFloat = 120
-                    if value.translation.width < -horizontalThreshold || value.predictedEndTranslation.width < -predictedThreshold {
-                        onHorizontalSwipe(.next)
-                    } else if value.translation.width > horizontalThreshold || value.predictedEndTranslation.width > predictedThreshold {
-                        onHorizontalSwipe(.previous)
-                    }
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                        dragOffset = .zero
-                    }
-                    return
-                }
-
                 guard axis == .vertical else {
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                         dragOffset = .zero
@@ -358,19 +326,14 @@ private enum DragAxis {
     case horizontal
 }
 
-enum SwipeDirection {
-    case previous
-    case next
-}
-
 private struct MediaZoomPagerPreviewWrapper: View {
     @Namespace private var namespace
 
     var body: some View {
         MediaZoomPagerView(
             items: [
-                MediaItem(id: "1", url: "https://example.com/1.jpg", urlThumb: nil, urlMedium: nil, urlLarge: nil, width: 1200, height: 800, likes: 0, liked: false, datetimeOriginal: nil, createdAt: nil),
-                MediaItem(id: "2", url: "https://example.com/2.jpg", urlThumb: nil, urlMedium: nil, urlLarge: nil, width: 800, height: 1200, likes: 0, liked: false, datetimeOriginal: nil, createdAt: nil)
+                MediaItem(id: "1", url: "https://example.com/1.jpg", urlThumb: nil, urlMedium: nil, urlLarge: nil, width: 1200, height: 800, likes: 0, liked: false, datetimeOriginal: nil, createdAt: nil, filename: nil, size: nil, mimeType: nil, cameraMake: nil, cameraModel: nil, lensModel: nil, aperture: nil, shutterSpeed: nil, iso: nil, focalLength: nil, locationName: nil, gpsLat: nil, gpsLon: nil, tags: nil, categories: nil),
+                MediaItem(id: "2", url: "https://example.com/2.jpg", urlThumb: nil, urlMedium: nil, urlLarge: nil, width: 800, height: 1200, likes: 0, liked: false, datetimeOriginal: nil, createdAt: nil, filename: nil, size: nil, mimeType: nil, cameraMake: nil, cameraModel: nil, lensModel: nil, aperture: nil, shutterSpeed: nil, iso: nil, focalLength: nil, locationName: nil, gpsLat: nil, gpsLon: nil, tags: nil, categories: nil)
             ],
             startId: "1",
             namespace: namespace

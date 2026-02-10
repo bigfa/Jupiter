@@ -376,13 +376,6 @@ struct MediaItemInfoView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            if let filename = item.filename, !filename.isEmpty {
-                Text(filename)
-                    .font(.headline.weight(.semibold))
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.9)
-            }
-
             if infoCards.isEmpty {
                 Text("暂无EXIF信息")
                     .font(.caption)
@@ -413,12 +406,8 @@ struct MediaItemInfoView: View {
         addCard(&cards, label: "快门", value: item.shutterSpeed)
         addCard(&cards, label: "ISO", value: item.iso)
         addCard(&cards, label: "焦距", value: item.focalLength)
-        addCard(&cards, label: "尺寸", value: dimensionsText)
-        addCard(&cards, label: "长宽比", value: aspectRatioText)
-        addCard(&cards, label: "大小", value: fileSizeText)
         addCard(&cards, label: "格式", value: item.mimeType)
         addCard(&cards, label: "拍摄时间", value: formatDate(item.datetimeOriginal))
-        addCard(&cards, label: "上传时间", value: formatDate(item.createdAt))
         addCard(&cards, label: "经纬度", value: coordinateText)
         addCard(&cards, label: "位置", value: item.locationName)
         if let tags = item.tags, !tags.isEmpty {
@@ -458,22 +447,6 @@ struct MediaItemInfoView: View {
             RoundedRectangle(cornerRadius: 12, style: .continuous)
                 .stroke(Color.black.opacity(0.06), lineWidth: 1)
         )
-    }
-
-    private var dimensionsText: String? {
-        guard let w = item.width, let h = item.height else { return nil }
-        return "\(w) × \(h)"
-    }
-
-    private var aspectRatioText: String? {
-        guard let w = item.width, let h = item.height, h != 0 else { return nil }
-        let ratio = Double(w) / Double(h)
-        return String(format: "%.2f", ratio)
-    }
-
-    private var fileSizeText: String? {
-        guard let size = item.size else { return nil }
-        return ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file)
     }
 
     private var coordinateText: String? {
