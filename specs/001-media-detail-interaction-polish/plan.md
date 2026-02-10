@@ -128,6 +128,13 @@ Code Review 发现的 Bug 与改进项：
 - **[Bug] 抽屉展开时图片向右侧偏移缩放**：`sheetScale`（`1.0 - sheetProgress * 0.08`）通过 `.scaleEffect()` 缩放图片，但 `.position()` 后的视图中心与布局中心不一致，导致缩放后图片视觉右偏且两侧不再贴边。修复：删除 `sheetScale`，`imageScale` 仅保留拖拽关闭缩放（`1.0 - dragProgress * 0.08`）。
 - **[Bug] 图片定位完全错误（T061 回归）**：T061 的 `.frame(proxy.size) + .clipped()` 方案在 `.position()` 和 ZStack 之间插入了固定尺寸约束，改变了 `.position()` 的坐标空间。原本 `.position()` 使用 ZStack（含 `.ignoresSafeArea()`）的全屏尺寸（852pt）作为坐标系，插入 `.frame(proxy.size)` 后改为 GeometryReader 的安全区内尺寸（759pt）。`imageRect.midY` 始终基于 `proxy.size` 计算，在全屏坐标系中偏上约 46px（可接受），但在缩小的坐标系中被 ZStack `.bottom` 对齐下移 93px。更严重的是，`fullScreenCover` 呈现动画期间 `proxy.size` 可能从 0 过渡到最终值，导致 `.frame(0, 0)` 瞬间把图片约束在零尺寸区域，部分图片只能看到一角、部分完全不可见。修复：**撤销 T061 的 `.frame() + .clipped()` 方案**，保持原始定位链不变，抽屉展开时图片上移溢出到状态栏后方是可接受的行为（底部被抽屉自然遮挡）。
 
+### Phase 8 - Swipe Paging & Metadata Decode Fix *(对应 tasks.md Phase 8)*
+
+交互测试与数据排查发现两个独立问题：
+
+- **[Bug] 左右滑动翻页失效且加载顺序错乱**：`MediaZoomDetailPage` 的自定义 `DragGesture`（`.simultaneousGesture`）同时处理了垂直拖拽和水平滑动。水平滑动时 TabView 原生 `.page` 手势和自定义手势的 `onHorizontalSwipe` 同时触发，`selection` 被更新两次（TabView 内部一次 + `handleHorizontalSwipe` 一次），导致翻页动画冲突、页面不跟随出现、连续滑动后 selection 跳格或错乱。修复：删除自定义手势中的水平滑动处理（`onHorizontalSwipe`、`SwipeDirection`、`handleHorizontalSwipe`），DragGesture 仅保留垂直方向的关闭/收起抽屉逻辑，水平翻页完全交给 TabView 原生处理。
+- **[Bug] Metadata 抽屉只显示尺寸和时间，EXIF 字段全部丢失**：`MediaItem` 模型中从 `filename` 起的所有属性声明为 `let ... : Type? = nil`，Swift 的 `Codable` 自动合成 `init(from:)` 对有默认值的 `let` 属性可能直接使用默认值而跳过解码，导致 API 返回的 `camera_make`、`aperture`、`iso` 等 EXIF 字段全部解码为 `nil`。而 `width`、`height`、`datetimeOriginal`、`createdAt` 没有 `= nil` 默认值，解码正常，因此只有尺寸和时间能显示。修复：移除所有 `= nil` 默认值，改为 `let ... : Type?`。
+
 ## Risk and Mitigation
 
 - **风险**: 抽屉高度与安全区叠加后导致拖拽锚点错位。
@@ -144,6 +151,10 @@ Code Review 发现的 Bug 与改进项：
   **缓解**: 图片通过 `imageOffsetY` 上移实现退让，溢出部分在状态栏后方不影响体验，底部由抽屉自然遮挡。
 - **风险**: 在 `.position()` 和 ZStack 之间插入 `.frame(proxy.size)` 改变坐标空间导致图片错位。
   **缓解**: 放弃 `.frame() + .clipped()` 裁切方案，保持 `.position()` 直接在 ZStack 内的原始定位链，避免坐标空间不匹配。
+- **风险**: 删除自定义水平滑动后，TabView 原生翻页手势与自定义垂直 DragGesture 仍可能冲突。
+  **缓解**: 自定义 DragGesture 已有轴判定逻辑（8px 死区后判断方向），检测到水平方向时不更新 `dragOffset`、不设置 `isVerticalDragging`，TabView 的 UIPanGestureRecognizer 可正常接管。
+- **风险**: 移除 `let ... = nil` 默认值后手动创建 `MediaItem` 的调用点（如 Preview）编译失败。
+  **缓解**: 更新所有手动构造 `MediaItem` 的调用点，补齐缺省参数。
 
 ## Complexity Tracking
 

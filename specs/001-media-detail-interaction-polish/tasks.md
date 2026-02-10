@@ -179,6 +179,37 @@ description: "Task list for 媒体详情交互收尾优化"
 
 ---
 
+## Phase 8: Swipe Paging & Metadata Decode Fix
+
+**Purpose**: 修复左右翻页手势冲突与 Metadata EXIF 字段解码失败
+
+**⚠️ BUG**: T070 为阻塞性问题，左右滑动翻页完全失效
+
+### Bug Fix
+
+- [ ] T070 [P] 在 `/Users/rich/Projects/Jupiter/Jupiter/Views/MediaZoomPagerView.swift` 删除自定义手势中的水平滑动处理：
+  1. 删除 `MediaZoomDetailPage` 的 `onHorizontalSwipe` 回调参数
+  2. 删除 DragGesture `.onEnded` 中 `axis == .horizontal` 分支（调用 `onHorizontalSwipe` 的代码）
+  3. 删除 `MediaZoomPagerView` 的 `handleHorizontalSwipe` 方法
+  4. 删除 `SwipeDirection` 枚举
+  > 原因：TabView `.page` 原生手势与自定义 `DragGesture` 的 `onHorizontalSwipe` 同时更新 `selection`，导致翻页动画冲突、页面不跟随出现、连续滑动后加载顺序错乱
+
+- [ ] T071 [P] 在 `/Users/rich/Projects/Jupiter/Jupiter/Models/Media.swift` 移除 `MediaItem` 所有属性的 `= nil` 默认值：
+  将 `let filename: String? = nil` 等声明改为 `let filename: String?`（影响 `filename`~`categories` 共 14 个属性）
+  > 原因：`let ... = nil` 导致 Swift Codable 自动合成的 `init(from:)` 跳过解码，API 返回的 EXIF 字段全部丢失，抽屉只能显示尺寸和时间
+
+- [ ] T072 [P] 更新所有手动创建 `MediaItem` 的调用点（Preview、测试等），补齐移除默认值后的缺省参数
+
+### Verification
+
+- [ ] T073 执行 `xcodebuild build` 确认编译通过
+- [ ] T074 [manual] 验证：左右滑动翻页流畅，页面跟随出现，连续滑动顺序正确
+- [ ] T075 [manual] 验证：抽屉展开后显示相机、光圈、ISO、快门等 EXIF 信息
+
+**Checkpoint**: 翻页手势与 Metadata 解码修复
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies
@@ -189,6 +220,7 @@ description: "Task list for 媒体详情交互收尾优化"
 - Polish (Phase 5) 依赖目标用户故事完成
 - Code Review Fixes (Phase 6) 可独立开始，T050 优先级最高
 - Drag Dismiss & Scaling Fix (Phase 7) 依赖 Phase 6 完成，T060 优先级最高
+- Swipe Paging & Metadata Fix (Phase 8) 可独立开始，T070/T071 可并行（不同文件）
 
 ### User Story Dependencies
 
@@ -213,10 +245,16 @@ description: "Task list for 媒体详情交互收尾优化"
 
 已完成任务：T001, T003-T005, T010-T014, T020-T023, T025, T030-T035, T040-T041, T043, T050-T053, T060, T062, T065
 
-待办任务（共 5 项）：
+待办任务（共 11 项）：
 
 | 任务 | 类型 | 优先级 | 说明 |
 |------|------|--------|------|
+| T070 | bug fix | **P0** | 删除自定义水平滑动处理，修复翻页冲突 |
+| T071 | bug fix | **P0** | 移除 MediaItem `= nil` 默认值，修复 EXIF 解码 |
+| T072 | fix | P1 | 更新手动创建 MediaItem 的调用点 |
+| T073 | build | P1 | 编译验证 |
+| T074 | manual | P1 | 验证左右翻页流畅 |
+| T075 | manual | P1 | 验证抽屉显示 EXIF 信息 |
 | T063 | manual | P1 | 验证背景不随图片移动 |
 | T064 | manual | P1 | 验证图片两侧贴边无右偏 |
 | T066 | manual | P1 | 验证图片定位正确无错位 |
