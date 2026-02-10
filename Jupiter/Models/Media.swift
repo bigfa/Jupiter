@@ -12,21 +12,21 @@ struct MediaItem: Identifiable, Codable, Hashable {
     let liked: Bool?
     let datetimeOriginal: String?
     let createdAt: String?
-    let filename: String? = nil
-    let size: Int? = nil
-    let mimeType: String? = nil
-    let cameraMake: String? = nil
-    let cameraModel: String? = nil
-    let lensModel: String? = nil
-    let aperture: String? = nil
-    let shutterSpeed: String? = nil
-    let iso: String? = nil
-    let focalLength: String? = nil
-    let locationName: String? = nil
-    let gpsLat: Double? = nil
-    let gpsLon: Double? = nil
-    let tags: [String]? = nil
-    let categories: [MediaCategory]? = nil
+    let filename: String?
+    let size: Int?
+    let mimeType: String?
+    let cameraMake: String?
+    let cameraModel: String?
+    let lensModel: String?
+    let aperture: String?
+    let shutterSpeed: String?
+    let iso: String?
+    let focalLength: String?
+    let locationName: String?
+    let gpsLat: Double?
+    let gpsLon: Double?
+    let tags: [String]?
+    let categories: [MediaCategory]?
 
     enum CodingKeys: String, CodingKey {
         case id

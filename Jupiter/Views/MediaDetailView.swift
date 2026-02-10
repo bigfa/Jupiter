@@ -207,23 +207,14 @@ private struct MediaDetailInfoView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            if let filename = media.filename {
-                Text(filename)
-                    .font(.headline)
-            }
-
             infoRow(label: "相机", value: [media.cameraMake, media.cameraModel].compactMap { $0 }.joined(separator: " "))
             infoRow(label: "镜头", value: media.lensModel)
             infoRow(label: "光圈", value: media.aperture)
             infoRow(label: "快门", value: media.shutterSpeed)
             infoRow(label: "ISO", value: media.iso)
             infoRow(label: "焦距", value: media.focalLength)
-            infoRow(label: "尺寸", value: dimensionsText)
-            infoRow(label: "长宽比", value: aspectRatioText)
-            infoRow(label: "大小", value: fileSizeText)
             infoRow(label: "格式", value: media.mimeType)
             infoRow(label: "拍摄时间", value: formatDate(media.datetimeOriginal))
-            infoRow(label: "上传时间", value: formatDate(media.createdAt))
             infoRow(label: "经纬度", value: coordinateText)
             infoRow(label: "位置", value: media.locationName)
 
@@ -259,22 +250,6 @@ private struct MediaDetailInfoView: View {
                     .font(.caption)
             }
         }
-    }
-
-    private var dimensionsText: String? {
-        guard let w = media.width, let h = media.height else { return nil }
-        return "\(w) × \(h)"
-    }
-
-    private var aspectRatioText: String? {
-        guard let w = media.width, let h = media.height, h != 0 else { return nil }
-        let ratio = Double(w) / Double(h)
-        return String(format: "%.2f", ratio)
-    }
-
-    private var fileSizeText: String? {
-        guard let size = media.size else { return nil }
-        return ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file)
     }
 
     private var coordinateText: String? {
@@ -336,7 +311,22 @@ struct MediaDetailView_Previews: PreviewProvider {
             likes: 12,
             liked: false,
             datetimeOriginal: nil,
-            createdAt: nil
+            createdAt: nil,
+            filename: nil,
+            size: nil,
+            mimeType: nil,
+            cameraMake: nil,
+            cameraModel: nil,
+            lensModel: nil,
+            aperture: nil,
+            shutterSpeed: nil,
+            iso: nil,
+            focalLength: nil,
+            locationName: nil,
+            gpsLat: nil,
+            gpsLon: nil,
+            tags: nil,
+            categories: nil
         ))
     }
 }
