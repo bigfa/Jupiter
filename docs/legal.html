@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jupiter – Legal</title>
+  <style>
+    :root {
+      --bg: #f9f9f9;
+      --surface: #ffffff;
+      --text: #1a1a1a;
+      --muted: #6b6b6b;
+      --border: #e5e5e5;
+      --accent: #0071e3;
+      --radius: 12px;
+      --max-w: 720px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111111;
+        --surface: #1c1c1e;
+        --text: #f5f5f7;
+        --muted: #8e8e93;
+        --border: #2c2c2e;
+        --accent: #2997ff;
+      }
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      font-size: 16px;
+    }
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .app-name {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+    .lang-toggle {
+      display: flex;
+      background: var(--border);
+      border-radius: 8px;
+      padding: 3px;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+    .lang-toggle button {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 5px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .lang-toggle button.active {
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+    nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      gap: 0;
+    }
+    .nav-tab {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 500;
+      padding: 12px 20px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .nav-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    main {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+    .doc-section { display: none; }
+    .doc-section.visible { display: block; }
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+    .effective-date {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 36px;
+    }
+    h2 {
+      font-size: 17px;
+      font-weight: 600;
+      margin-top: 36px;
+      margin-bottom: 10px;
+    }
+    p { margin-bottom: 14px; color: var(--text); }
+    ul {
+      margin: 8px 0 14px 20px;
+    }
+    ul li { margin-bottom: 6px; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0;
+    }
+    footer {
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+      padding: 32px 24px;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <span class="app-name">Jupiter</span>
+    <div class="lang-toggle">
+      <button id="btn-en" class="active" onclick="setLang('en')">English</button>
+      <button id="btn-zh" onclick="setLang('zh')">中文</button>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <div class="nav-inner">
+    <button class="nav-tab active" id="tab-privacy" onclick="setTab('privacy')">
+      <span class="en">Privacy Policy</span>
+      <span class="zh" style="display:none">隐私政策</span>
+    </button>
+    <button class="nav-tab" id="tab-terms" onclick="setTab('terms')">
+      <span class="en">Terms of Use</span>
+      <span class="zh" style="display:none">用户协议</span>
+    </button>
+  </div>
+</nav>
+
+<main>
+
+  <!-- ===== PRIVACY POLICY ===== -->
+  <div class="doc-section visible" id="privacy">
+
+    <!-- English -->
+    <div class="en">
+      <h1>Privacy Policy</h1>
+      <p class="effective-date">Effective Date: February 23, 2026</p>
+
+      <p>Jupiter ("we", "our", or "us") is a personal photo album client. This Privacy Policy explains what information we collect, how we use it, and your rights regarding your data.</p>
+
+      <h2>1. Information We Collect</h2>
+      <p><strong>Account credentials.</strong> When you configure the app, you provide a server URL and optional credentials (username / API token). These are stored locally on your device using the iOS Keychain and are never transmitted to us.</p>
+      <p><strong>Photos and metadata.</strong> The app displays photos and EXIF metadata (camera model, aperture, GPS coordinates, etc.) fetched from your own self-hosted server. We do not access, copy, or store this content on our servers.</p>
+      <p><strong>Usage data.</strong> We do not collect analytics, crash reports, or any behavioral data about how you use the app.</p>
+
+      <h2>2. Data Storage</h2>
+      <p>All data accessed through Jupiter remains on your device or on the server you control. We operate no backend infrastructure and store no personal data on our behalf.</p>
+
+      <h2>3. Third-Party Services</h2>
+      <p>Jupiter uses the following third-party library solely for image loading and caching:</p>
+      <ul>
+        <li><strong>Kingfisher</strong> – image downloading and caching, open-source (MIT). No data is shared with Kingfisher's authors.</li>
+      </ul>
+      <p>The app makes network requests only to the server URL you configure. No requests are made to any other external service.</p>
+
+      <h2>4. Children's Privacy</h2>
+      <p>Jupiter is not directed at children under 13. We do not knowingly collect personal information from children.</p>
+
+      <h2>5. Changes to This Policy</h2>
+      <p>We may update this Privacy Policy from time to time. Changes will be reflected by updating the effective date above. Continued use of the app after changes constitutes acceptance of the updated policy.</p>
+
+      <h2>6. Contact</h2>
+      <p>If you have questions about this Privacy Policy, please contact us at <a href="mailto:hi@wpista.com">hi@wpista.com</a>.</p>
+    </div>
+
+    <!-- Chinese -->
+    <div class="zh" style="display:none">
+      <h1>隐私政策</h1>
+      <p class="effective-date">生效日期：2026 年 2 月 23 日</p>
+
+      <p>Jupiter 是一款个人相册客户端。本隐私政策说明我们收集哪些信息、如何使用以及您对数据的相关权利。</p>
+
+      <h2>1. 我们收集的信息</h2>
+      <p><strong>账户凭据。</strong>配置应用时，您需提供服务器地址及可选的账户凭据（用户名 / API 令牌）。这些信息仅存储在您设备的 iOS Keychain 中，不会传输至我们的服务器。</p>
+      <p><strong>照片与元数据。</strong>应用从您自托管的服务器获取照片及 EXIF 元数据（相机型号、光圈、GPS 坐标等）并展示。我们不访问、复制或存储这些内容。</p>
+      <p><strong>使用数据。</strong>我们不收集任何分析数据、崩溃报告或行为数据。</p>
+
+      <h2>2. 数据存储</h2>
+      <p>通过 Jupiter 访问的所有数据均保存在您的设备或您控制的服务器上。我们不运营任何后端基础设施，也不存储任何个人数据。</p>
+
+      <h2>3. 第三方服务</h2>
+      <p>Jupiter 仅使用以下第三方库进行图片加载与缓存：</p>
+      <ul>
+        <li><strong>Kingfisher</strong> – 开源图片下载与缓存库（MIT 协议），不向其作者共享任何数据。</li>
+      </ul>
+      <p>应用的网络请求仅发送至您配置的服务器地址，不向任何其他外部服务发送请求。</p>
+
+      <h2>4. 儿童隐私</h2>
+      <p>Jupiter 不面向 13 岁以下儿童。我们不会故意收集儿童的个人信息。</p>
+
+      <h2>5. 政策变更</h2>
+      <p>我们可能不时更新本隐私政策。变更将通过更新上方的生效日期反映。继续使用应用即表示您接受更新后的政策。</p>
+
+      <h2>6. 联系我们</h2>
+      <p>如对本隐私政策有任何疑问，请通过 <a href="mailto:hi@wpista.com">hi@wpista.com</a> 联系我们。</p>
+    </div>
+
+  </div><!-- /privacy -->
+
+  <!-- ===== TERMS OF USE ===== -->
+  <div class="doc-section" id="terms">
+
+    <!-- English -->
+    <div class="en">
+      <h1>Terms of Use</h1>
+      <p class="effective-date">Effective Date: February 23, 2026</p>
+
+      <p>Please read these Terms of Use carefully before using Jupiter. By downloading or using the app, you agree to be bound by these terms.</p>
+
+      <h2>1. Acceptance of Terms</h2>
+      <p>These Terms of Use ("Terms") govern your use of the Jupiter iOS application ("App"). If you do not agree to these Terms, do not use the App.</p>
+
+      <h2>2. Description of Service</h2>
+      <p>Jupiter is a client application that connects to a self-hosted photo management server. The App allows you to browse, view, and interact with photos stored on your own server infrastructure.</p>
+
+      <h2>3. User Responsibilities</h2>
+      <p>You are solely responsible for:</p>
+      <ul>
+        <li>The content you access through the App, including all photos and media.</li>
+        <li>Ensuring you have the right to access and display the content on your server.</li>
+        <li>Maintaining the security of your server and credentials.</li>
+        <li>Complying with all applicable laws and regulations in your jurisdiction.</li>
+      </ul>
+
+      <h2>4. Prohibited Use</h2>
+      <p>You agree not to use the App to:</p>
+      <ul>
+        <li>Access, store, or distribute content that is illegal, harmful, or infringes third-party rights.</li>
+        <li>Attempt to reverse-engineer, decompile, or modify the App.</li>
+        <li>Use the App for any commercial purpose without our prior written consent.</li>
+      </ul>
+
+      <h2>5. Intellectual Property</h2>
+      <p>The App, including its design, code, and assets, is owned by us and protected by applicable intellectual property laws. You are granted a limited, non-exclusive, non-transferable license to use the App for personal, non-commercial purposes.</p>
+
+      <h2>6. Disclaimer of Warranties</h2>
+      <p>The App is provided "as is" without warranties of any kind, express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, or non-infringement. We do not warrant that the App will be error-free or uninterrupted.</p>
+
+      <h2>7. Limitation of Liability</h2>
+      <p>To the fullest extent permitted by law, we shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of or inability to use the App, even if we have been advised of the possibility of such damages.</p>
+
+      <h2>8. Termination</h2>
+      <p>We reserve the right to terminate or suspend access to the App at any time, without notice, for conduct that violates these Terms or is otherwise harmful to us, other users, or third parties.</p>
+
+      <h2>9. Governing Law</h2>
+      <p>These Terms shall be governed by and construed in accordance with applicable law. Any disputes arising from these Terms shall be resolved through good-faith negotiation.</p>
+
+      <h2>10. Changes to Terms</h2>
+      <p>We may modify these Terms at any time. Changes will be effective upon posting with an updated effective date. Your continued use of the App constitutes acceptance of the revised Terms.</p>
+
+      <h2>11. Contact</h2>
+      <p>If you have questions about these Terms, please contact us at <a href="mailto:hi@wpista.com">hi@wpista.com</a>.</p>
+    </div>
+
+    <!-- Chinese -->
+    <div class="zh" style="display:none">
+      <h1>用户协议</h1>
+      <p class="effective-date">生效日期：2026 年 2 月 23 日</p>
+
+      <p>请在使用 Jupiter 之前仔细阅读本用户协议。下载或使用本应用即表示您同意受本协议约束。</p>
+
+      <h2>1. 接受条款</h2>
+      <p>本用户协议（"协议"）规范您对 Jupiter iOS 应用（"应用"）的使用。如您不同意本协议，请勿使用本应用。</p>
+
+      <h2>2. 服务说明</h2>
+      <p>Jupiter 是一款连接自托管照片管理服务器的客户端应用，允许您浏览、查看和管理存储在您自有服务器上的照片及媒体内容。</p>
+
+      <h2>3. 用户责任</h2>
+      <p>您须独自承担以下责任：</p>
+      <ul>
+        <li>通过应用访问的所有内容，包括照片和媒体文件。</li>
+        <li>确保您拥有访问和展示服务器上内容的合法权利。</li>
+        <li>维护您服务器及账户凭据的安全。</li>
+        <li>遵守您所在司法管辖区的所有适用法律法规。</li>
+      </ul>
+
+      <h2>4. 禁止行为</h2>
+      <p>您同意不通过本应用：</p>
+      <ul>
+        <li>访问、存储或传播违法、有害或侵犯第三方权利的内容。</li>
+        <li>尝试对应用进行反向工程、反编译或修改。</li>
+        <li>未经我们事先书面同意将应用用于任何商业目的。</li>
+      </ul>
+
+      <h2>5. 知识产权</h2>
+      <p>应用及其设计、代码和资源归我们所有，受适用知识产权法律保护。我们授予您有限的、非独家的、不可转让的许可，仅供个人非商业用途使用本应用。</p>
+
+      <h2>6. 免责声明</h2>
+      <p>本应用按"现状"提供，不附带任何明示或暗示的保证，包括但不限于适销性、特定用途适用性或不侵权的保证。我们不保证应用不会出错或不会中断。</p>
+
+      <h2>7. 责任限制</h2>
+      <p>在法律允许的最大范围内，对于因您使用或无法使用本应用而引起的任何间接、附带、特殊、后果性或惩罚性损害，我们不承担任何责任，即使我们已被告知此类损害的可能性。</p>
+
+      <h2>8. 终止</h2>
+      <p>我们保留在任何时候无需通知地终止或暂停应用访问权限的权利，适用于违反本协议或对我们、其他用户或第三方造成损害的行为。</p>
+
+      <h2>9. 适用法律</h2>
+      <p>本协议受适用法律管辖并依其解释。因本协议引发的任何争议应通过善意协商解决。</p>
+
+      <h2>10. 协议变更</h2>
+      <p>我们可能随时修改本协议。变更在发布更新后的生效日期时即生效。继续使用应用即表示您接受修订后的协议。</p>
+
+      <h2>11. 联系我们</h2>
+      <p>如对本协议有任何疑问，请通过 <a href="mailto:hi@wpista.com">hi@wpista.com</a> 联系我们。</p>
+    </div>
+
+  </div><!-- /terms -->
+
+</main>
+
+<footer>
+  <span class="en">© 2026 Jupiter. All rights reserved.</span>
+  <span class="zh" style="display:none">© 2026 Jupiter. 保留所有权利。</span>
+</footer>
+
+<script>
+  var currentLang = 'en';
+  var currentTab = 'privacy';
+
+  function setLang(lang) {
+    currentLang = lang;
+    document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+    document.getElementById('btn-zh').classList.toggle('active', lang === 'zh');
+    document.querySelectorAll('.en').forEach(function(el) {
+      el.style.display = lang === 'en' ? '' : 'none';
+    });
+    document.querySelectorAll('.zh').forEach(function(el) {
+      el.style.display = lang === 'zh' ? '' : 'none';
+    });
+    document.documentElement.lang = lang === 'zh' ? 'zh-Hans' : 'en';
+  }
+
+  function setTab(tab) {
+    currentTab = tab;
+    document.getElementById('tab-privacy').classList.toggle('active', tab === 'privacy');
+    document.getElementById('tab-terms').classList.toggle('active', tab === 'terms');
+    document.getElementById('privacy').classList.toggle('visible', tab === 'privacy');
+    document.getElementById('terms').classList.toggle('visible', tab === 'terms');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+
+</body>
+</html>
