@@ -74,6 +74,6 @@ final class MediaLikeViewModel {
         if let apiError = error as? APIError {
             return apiError.message
         }
-        return "点赞请求失败，请稍后重试"
+        return String(localized: "Like request failed, please try again later")
     }
 }

@@ -43,7 +43,7 @@ struct AlbumCard: View {
 
                 HStack(spacing: 8) {
                     if let count = album.mediaCount {
-                        Text("\(count) 张")
+                        Text("\(count) photos")
                     }
                     if let likes = album.likes, likes > 0 {
                         Text("♥︎ \(likes)")
@@ -59,7 +59,7 @@ struct AlbumCard: View {
                 VStack {
                     HStack {
                         Spacer()
-                        Label("私密", systemImage: "lock.fill")
+                        Label("Locked", systemImage: "lock.fill")
                             .font(.caption2)
                             .foregroundStyle(Color.white)
                             .padding(.horizontal, 8)

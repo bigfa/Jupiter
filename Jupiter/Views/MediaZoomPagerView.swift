@@ -384,7 +384,7 @@ private struct MetadataDrawer: View {
                     Button {
                         cycleHeight()
                     } label: {
-                        Text("Metadata")
+                        Text("Metadata", bundle: .main)
                             .font(.subheadline.weight(.semibold))
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .contentShape(Rectangle())

@@ -51,7 +51,7 @@ struct AlbumDetailView: View {
                 }
             }
         }
-        .navigationTitle("相册")
+        .navigationTitle("Album")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .tabBar)
         .overlay {
@@ -59,12 +59,12 @@ struct AlbumDetailView: View {
                 ProgressView()
             } else if let message = viewModel.errorMessage, viewModel.media.isEmpty {
                 VStack(spacing: 8) {
-                    Text("加载失败")
+                    Text("Failed to load")
                         .font(.headline)
                     Text(message)
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    Button("重试") {
+                    Button("Retry") {
                         Task { await viewModel.loadInitial() }
                     }
                 }
@@ -106,7 +106,7 @@ struct AlbumDetailView: View {
     @ViewBuilder
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(viewModel.album?.title ?? preview?.title ?? "相册")
+            Text(viewModel.album?.title ?? preview?.title ?? String(localized: "Album"))
                 .font(.title2.bold())
 
             if let description = viewModel.album?.description ?? preview?.description, !description.isEmpty {
@@ -117,7 +117,7 @@ struct AlbumDetailView: View {
 
             HStack(spacing: 12) {
                 if let count = viewModel.album?.mediaCount ?? preview?.mediaCount {
-                    Text("\(count) 张")
+                    Text("\(count) photos")
                 }
                 if likeViewModel.likes > 0 {
                     Text("♥︎ \(likeViewModel.likes)")
@@ -130,7 +130,7 @@ struct AlbumDetailView: View {
                 Button {
                     Task { await likeViewModel.toggle() }
                 } label: {
-                    Label(likeViewModel.liked ? "已赞" : "点赞", systemImage: likeViewModel.liked ? "heart.fill" : "heart")
+                    Label(likeViewModel.liked ? String(localized: "Liked") : String(localized: "Like"), systemImage: likeViewModel.liked ? "heart.fill" : "heart")
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(likeViewModel.liked ? .pink : .accentColor)
@@ -173,13 +173,13 @@ private struct AlbumCommentsSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("评论")
+            Text("Comments")
                 .font(.headline)
 
             if viewModel.isLoading {
                 ProgressView()
             } else if viewModel.comments.isEmpty {
-                Text("暂无评论")
+                Text("No comments yet")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             } else {
@@ -191,26 +191,26 @@ private struct AlbumCommentsSection: View {
             }
 
             VStack(alignment: .leading, spacing: 8) {
-                Text("发表评论")
+                Text("Add a comment")
                     .font(.subheadline)
 
                 if let replyingTo {
                     HStack(spacing: 8) {
-                        Text("回复: \(replyingTo.authorName ?? "匿名")")
+                        Text("Replying to: \(replyingTo.authorName ?? String(localized: "Anonymous"))")
                             .font(.caption)
                             .foregroundStyle(.secondary)
-                        Button("取消") {
+                        Button("Cancel") {
                             self.replyingTo = nil
                         }
                         .font(.caption)
                     }
                 }
 
-                TextField("昵称", text: $name)
+                TextField("Nickname", text: $name)
                     .textFieldStyle(.roundedBorder)
-                TextField("邮箱", text: $email)
+                TextField("Email", text: $email)
                     .textFieldStyle(.roundedBorder)
-                TextField("网站（可选）", text: $url)
+                TextField("Website (optional)", text: $url)
                     .textFieldStyle(.roundedBorder)
                 TextEditor(text: $content)
                     .frame(minHeight: 80)
@@ -219,7 +219,7 @@ private struct AlbumCommentsSection: View {
                             .stroke(Color(.separator))
                     )
 
-                Button(viewModel.isSubmitting ? "提交中..." : "提交评论") {
+                Button(viewModel.isSubmitting ? String(localized: "Submitting...") : String(localized: "Submit comment")) {
                     Task {
                         await viewModel.submit(
                             name: name,
@@ -288,11 +288,11 @@ private struct AlbumCommentsSheet: View {
                 AlbumCommentsSection(viewModel: viewModel)
                     .padding(16)
             }
-            .navigationTitle("评论")
+            .navigationTitle("Comments")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("完成") {
+                    Button("Done") {
                         dismiss()
                     }
                 }
@@ -333,7 +333,7 @@ private struct CommentRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 6) {
-                Text(comment.authorName ?? "匿名")
+                Text(comment.authorName ?? String(localized: "Anonymous"))
                     .font(.caption.bold())
                 if let dateText = formatDate(comment.createdAt) {
                     Text(dateText)
@@ -341,12 +341,12 @@ private struct CommentRow: View {
                         .foregroundStyle(.secondary)
                 }
                 if let status = comment.status, status != "approved" {
-                    Text("审核中")
+                    Text("Pending review")
                         .font(.caption2)
                         .foregroundStyle(.orange)
                 }
                 Spacer()
-                Button("回复") {
+                Button("Reply") {
                     onReply(comment)
                 }
                 .font(.caption2)
@@ -383,19 +383,19 @@ private struct AlbumUnlockSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section(header: Text("需要密码")) {
-                    SecureField("输入相册密码", text: $password)
+                Section(header: Text("Password required")) {
+                    SecureField("Enter album password", text: $password)
                 }
             }
-            .navigationTitle("解锁相册")
+            .navigationTitle("Unlock album")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("取消") {
+                    Button("Cancel") {
                         dismiss()
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(isSubmitting ? "处理中" : "解锁") {
+                    Button(isSubmitting ? String(localized: "Processing...") : String(localized: "Unlock")) {
                         Task {
                             isSubmitting = true
                             await onSubmit(password)

@@ -1,10 +1,12 @@
 import SwiftUI
+import SafariServices
 
 struct MediaFeedView: View {
     @Binding var rootSelection: RootSection
     @StateObject private var viewModel = MediaFeedViewModel()
     @Namespace private var heroNamespace
     @State private var selectedMediaForFullscreen: MediaItem? = nil
+    @State private var showAppInfo = false
 
     private let spacing: CGFloat = 6
 
@@ -89,7 +91,7 @@ struct MediaFeedView: View {
                                         )
                                         .frame(width: proxy.size.width, alignment: .leading)
                                     } else if !viewModel.items.isEmpty && !viewModel.canLoadMore {
-                                        Text("没有更多了")
+                                        Text("No more")
                                             .font(.caption)
                                             .foregroundStyle(.secondary)
                                             .frame(maxWidth: .infinity)
@@ -129,12 +131,12 @@ struct MediaFeedView: View {
                             .padding()
                     } else if let message = viewModel.errorMessage, viewModel.items.isEmpty {
                         VStack(spacing: 8) {
-                            Text("加载失败")
+                            Text("Failed to load")
                                 .font(.headline)
                             Text(message)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
-                            Button("重试") {
+                            Button("Retry") {
                                 Task { await viewModel.loadInitial() }
                             }
                         }
@@ -154,6 +156,7 @@ struct MediaFeedView: View {
                                 }
                             )
                             Spacer()
+                            SettingsFloatingButton { showAppInfo = true }
                         }
                     }
                     .frame(maxWidth: .infinity)
@@ -164,6 +167,9 @@ struct MediaFeedView: View {
                     if viewModel.items.isEmpty {
                         await viewModel.loadInitial(preserveItems: false)
                     }
+                }
+                .sheet(isPresented: $showAppInfo) {
+                    AppInfoSheet()
                 }
                 .fullScreenCover(item: $selectedMediaForFullscreen) { item in
                     ZStack {
@@ -220,7 +226,7 @@ struct MediaFeedView: View {
     private func dateKeyTitle(for item: MediaItem) -> (String, String) {
         let raw = item.datetimeOriginal ?? item.createdAt
         guard let raw, let date = parseISODate(raw) else {
-            return ("unknown", "未知日期")
+            return ("unknown", String(localized: "Unknown date"))
         }
 
         let keyFormatter = DateFormatter()
@@ -419,7 +425,7 @@ private struct MediaFilterBar: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 20) {
                     CategoryTab(
-                        title: "All",
+                        title: String(localized: "All"),
                         selected: selectedCategory == nil
                     ) {
                         selectedCategory = nil
@@ -454,7 +460,7 @@ private struct SortFloatingButton: View {
             Image(systemName: "line.3.horizontal.decrease.circle")
             Text(selectedSort.label)
         }
-        .confirmationDialog("排序方式", isPresented: $showMenu, titleVisibility: .visible) {
+        .confirmationDialog("Sort", isPresented: $showMenu, titleVisibility: .visible) {
             ForEach(MediaSortOption.allCases) { option in
                 Button(option.label) {
                     onSelect(option)
@@ -494,6 +500,77 @@ private struct EmptyCategoryPlaceholder: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
+}
+
+extension URL: @retroactive Identifiable {
+    public var id: String { absoluteString }
+}
+
+private struct SettingsFloatingButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        FloatingCapsuleButton(action: action) {
+            Image(systemName: "gearshape")
+        }
+    }
+}
+
+private struct AppInfoSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @State private var safariURL: URL? = nil
+
+    private let privacyURL = URL(string: "https://bigfa.github.io/Jupiter/legal.html")!
+    private let termsURL = URL(string: "https://bigfa.github.io/Jupiter/legal.html#terms")!
+
+    private var appVersion: String {
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "—"
+        return "\(version) (\(build))"
+    }
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    HStack {
+                        Text("Version")
+                        Spacer()
+                        Text(appVersion)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Section {
+                    Button("Privacy Policy") { safariURL = privacyURL }
+                        .foregroundStyle(.primary)
+                    Button("Terms of Service") { safariURL = termsURL }
+                        .foregroundStyle(.primary)
+                }
+            }
+            .navigationTitle("About Tinyglim")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+        .sheet(item: $safariURL) { url in
+            SafariView(url: url)
+                .ignoresSafeArea()
+        }
+    }
+}
+
+private struct SafariView: UIViewControllerRepresentable {
+    let url: URL
+
+    func makeUIViewController(context: Context) -> SFSafariViewController {
+        SFSafariViewController(url: url)
+    }
+
+    func updateUIViewController(_ uiViewController: SFSafariViewController, context: Context) {}
 }
 
 struct MediaFeedView_Previews: PreviewProvider {

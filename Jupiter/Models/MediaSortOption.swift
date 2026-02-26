@@ -8,8 +8,8 @@ enum MediaSortOption: String, CaseIterable, Identifiable {
 
     var label: String {
         switch self {
-        case .date: return "最新"
-        case .likes: return "最热"
+        case .date: return String(localized: "Latest")
+        case .likes: return String(localized: "Hottest")
         }
     }
 }
