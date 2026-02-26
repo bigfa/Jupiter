@@ -88,7 +88,7 @@ struct MediaDetailView: View {
                     Button {
                         Task { await likeViewModel.toggle() }
                     } label: {
-                        Label(likeViewModel.liked ? "已赞" : "点赞", systemImage: likeViewModel.liked ? "heart.fill" : "heart")
+                        Label(likeViewModel.liked ? String(localized: "Liked") : String(localized: "Like"), systemImage: likeViewModel.liked ? "heart.fill" : "heart")
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(likeViewModel.liked ? .pink : .accentColor)
@@ -110,7 +110,7 @@ struct MediaDetailView: View {
             }
             .padding(16)
         }
-        .navigationTitle("照片")
+        .navigationTitle("Photo")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .tabBar)
         .task {
@@ -124,8 +124,8 @@ struct MediaDetailView: View {
                 ProgressView()
             }
         }
-        .alert("下载提示", isPresented: $showDownloadAlert) {
-            Button("确定") {
+        .alert("Save photo", isPresented: $showDownloadAlert) {
+            Button("OK") {
                 downloadMessage = nil
                 showDownloadAlert = false
             }
@@ -148,19 +148,19 @@ extension MediaDetailView {
         do {
             let authorized = await requestPhotoAccess()
             if !authorized {
-                downloadMessage = "未授权访问相册"
+                downloadMessage = String(localized: "Photo library access denied")
                 showDownloadAlert = true
                 return
             }
             let (data, _) = try await URLSession.shared.data(from: url)
             if let image = UIImage(data: data) {
                 UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
-                downloadMessage = "已保存到相册"
+                downloadMessage = String(localized: "Saved to Photos")
             } else {
-                downloadMessage = "保存失败"
+                downloadMessage = String(localized: "Failed to save")
             }
         } catch {
-            downloadMessage = "下载失败"
+            downloadMessage = String(localized: "Download failed")
         }
         showDownloadAlert = true
     }
@@ -207,25 +207,25 @@ private struct MediaDetailInfoView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            infoRow(label: "相机", value: [media.cameraMake, media.cameraModel].compactMap { $0 }.joined(separator: " "))
-            infoRow(label: "镜头", value: media.lensModel)
-            infoRow(label: "光圈", value: media.aperture)
-            infoRow(label: "快门", value: media.shutterSpeed)
-            infoRow(label: "ISO", value: media.iso)
-            infoRow(label: "焦距", value: media.focalLength)
-            infoRow(label: "格式", value: media.mimeType)
-            infoRow(label: "拍摄时间", value: formatDate(media.datetimeOriginal))
-            infoRow(label: "经纬度", value: coordinateText)
-            infoRow(label: "位置", value: media.locationName)
+            infoRow(label: String(localized: "Camera"), value: [media.cameraMake, media.cameraModel].compactMap { $0 }.joined(separator: " "))
+            infoRow(label: String(localized: "Lens"), value: media.lensModel)
+            infoRow(label: String(localized: "Aperture"), value: media.aperture)
+            infoRow(label: String(localized: "Shutter"), value: media.shutterSpeed)
+            infoRow(label: String(localized: "ISO"), value: media.iso)
+            infoRow(label: String(localized: "Focal length"), value: media.focalLength)
+            infoRow(label: String(localized: "Format"), value: media.mimeType)
+            infoRow(label: String(localized: "Shoot time"), value: formatDate(media.datetimeOriginal))
+            infoRow(label: String(localized: "GPS"), value: coordinateText)
+            infoRow(label: String(localized: "Location"), value: media.locationName)
 
             if let tags = media.tags, !tags.isEmpty {
-                Text("标签: \(tags.joined(separator: ", "))")
+                Text("Tags: \(tags.joined(separator: ", "))")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
 
             if let categories = media.categories, !categories.isEmpty {
-                Text("分类: \(categories.map { $0.name }.joined(separator: ", "))")
+                Text("Categories: \(categories.map { $0.name }.joined(separator: ", "))")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

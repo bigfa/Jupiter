@@ -44,8 +44,8 @@ struct FloatingTabSwitcher: View {
 
     var body: some View {
         HStack(spacing: 2) {
-            tabButton(for: .home, title: "照片")
-            tabButton(for: .albums, title: "相册")
+            tabButton(for: .home, title: String(localized: "Photos"))
+            tabButton(for: .albums, title: String(localized: "Albums"))
         }
         .padding(4)
         .background(.ultraThinMaterial)

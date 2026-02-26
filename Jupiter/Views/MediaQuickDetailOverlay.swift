@@ -377,7 +377,7 @@ struct MediaItemInfoView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             if infoCards.isEmpty {
-                Text("暂无EXIF信息")
+                Text("No EXIF data")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             } else {
@@ -400,21 +400,21 @@ struct MediaItemInfoView: View {
 
     private var infoCards: [(label: String, value: String)] {
         var cards: [(label: String, value: String)] = []
-        addCard(&cards, label: "相机", value: [item.cameraMake, item.cameraModel].compactMap { $0 }.joined(separator: " "))
-        addCard(&cards, label: "镜头", value: item.lensModel)
-        addCard(&cards, label: "光圈", value: item.aperture)
-        addCard(&cards, label: "快门", value: item.shutterSpeed)
-        addCard(&cards, label: "ISO", value: item.iso)
-        addCard(&cards, label: "焦距", value: item.focalLength)
-        addCard(&cards, label: "格式", value: item.mimeType)
-        addCard(&cards, label: "拍摄时间", value: formatDate(item.datetimeOriginal))
-        addCard(&cards, label: "经纬度", value: coordinateText)
-        addCard(&cards, label: "位置", value: item.locationName)
+        addCard(&cards, label: String(localized: "Camera"), value: [item.cameraMake, item.cameraModel].compactMap { $0 }.joined(separator: " "))
+        addCard(&cards, label: String(localized: "Lens"), value: item.lensModel)
+        addCard(&cards, label: String(localized: "Aperture"), value: item.aperture)
+        addCard(&cards, label: String(localized: "Shutter"), value: item.shutterSpeed)
+        addCard(&cards, label: String(localized: "ISO"), value: item.iso)
+        addCard(&cards, label: String(localized: "Focal length"), value: item.focalLength)
+        addCard(&cards, label: String(localized: "Format"), value: item.mimeType)
+        addCard(&cards, label: String(localized: "Shoot time"), value: formatDate(item.datetimeOriginal))
+        addCard(&cards, label: String(localized: "GPS"), value: coordinateText)
+        addCard(&cards, label: String(localized: "Location"), value: item.locationName)
         if let tags = item.tags, !tags.isEmpty {
-            addCard(&cards, label: "标签", value: tags.joined(separator: ", "))
+            addCard(&cards, label: String(localized: "Tags"), value: tags.joined(separator: ", "))
         }
         if let categories = item.categories, !categories.isEmpty {
-            addCard(&cards, label: "分类", value: categories.map { $0.name }.joined(separator: ", "))
+            addCard(&cards, label: String(localized: "Categories"), value: categories.map { $0.name }.joined(separator: ", "))
         }
         return cards
     }

@@ -13,8 +13,8 @@ enum RootSection: String {
 
     var toggleTitle: String {
         switch self {
-        case .home: return "相册"
-        case .albums: return "首页"
+        case .home: return String(localized: "Albums")
+        case .albums: return String(localized: "Home")
         }
     }
 

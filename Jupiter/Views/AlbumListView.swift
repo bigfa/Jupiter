@@ -39,7 +39,7 @@ struct AlbumListView: View {
                             AlbumListLoadMoreSkeleton()
                                 .padding(.horizontal, 12)
                         } else if !viewModel.albums.isEmpty && !viewModel.canLoadMore {
-                            Text("没有更多了")
+                            Text("No more")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                                 .padding(.bottom, 12)
@@ -77,12 +77,12 @@ struct AlbumListView: View {
             .overlay {
                 if let message = viewModel.errorMessage, viewModel.albums.isEmpty {
                     VStack(spacing: 8) {
-                        Text("加载失败")
+                        Text("Failed to load")
                             .font(.headline)
                         Text(message)
                             .font(.caption)
                             .foregroundStyle(.secondary)
-                        Button("重试") {
+                        Button("Retry") {
                             Task { await viewModel.loadInitial() }
                         }
                     }
@@ -110,7 +110,7 @@ private struct AlbumCategoryBar: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 20) {
                 CategoryTab(
-                    title: "All",
+                    title: String(localized: "All"),
                     selected: selectedCategory == nil
                 ) {
                     selectedCategory = nil
