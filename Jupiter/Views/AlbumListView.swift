@@ -110,7 +110,7 @@ private struct AlbumCategoryBar: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 20) {
                 CategoryTab(
-                    title: String(localized: "All"),
+                    title: "All",
                     selected: selectedCategory == nil
                 ) {
                     selectedCategory = nil

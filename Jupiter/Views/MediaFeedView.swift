@@ -425,7 +425,7 @@ private struct MediaFilterBar: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 20) {
                     CategoryTab(
-                        title: String(localized: "All"),
+                        title: "All",
                         selected: selectedCategory == nil
                     ) {
                         selectedCategory = nil
@@ -522,11 +522,10 @@ private struct AppInfoSheet: View {
 
     private let privacyURL = URL(string: "https://bigfa.github.io/Jupiter/legal.html")!
     private let termsURL = URL(string: "https://bigfa.github.io/Jupiter/legal.html#terms")!
+    private let authorEmailURL = URL(string: "mailto:jigoulee@gmail.com")!
 
     private var appVersion: String {
-        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
-        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "—"
-        return "\(version) (\(build))"
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
     }
 
     var body: some View {
@@ -539,6 +538,9 @@ private struct AppInfoSheet: View {
                         Text(appVersion)
                             .foregroundStyle(.secondary)
                     }
+
+                    Link("联系作者", destination: authorEmailURL)
+                        .foregroundStyle(.primary)
                 }
 
                 Section {

@@ -6,10 +6,8 @@ struct AlbumDetailView: View {
 
     @StateObject private var viewModel: AlbumDetailViewModel
     @StateObject private var likeViewModel: AlbumLikeViewModel
-    @StateObject private var commentsViewModel: AlbumCommentsViewModel
     @Namespace private var heroNamespace
     @State private var showUnlock = false
-    @State private var showComments = false
     @State private var selectedMediaForFullscreen: MediaItem? = nil
     private let spacing: CGFloat = 6
 
@@ -18,7 +16,6 @@ struct AlbumDetailView: View {
         self.preview = preview
         _viewModel = StateObject(wrappedValue: AlbumDetailViewModel(albumId: albumId))
         _likeViewModel = StateObject(wrappedValue: AlbumLikeViewModel(albumId: albumId))
-        _commentsViewModel = StateObject(wrappedValue: AlbumCommentsViewModel(albumId: albumId))
     }
 
     var body: some View {
@@ -76,7 +73,6 @@ struct AlbumDetailView: View {
                 await viewModel.loadInitial()
             }
             await likeViewModel.load()
-            await commentsViewModel.load()
         }
         .onChange(of: viewModel.requiresPassword) { _, requires in
             showUnlock = requires
@@ -85,9 +81,6 @@ struct AlbumDetailView: View {
             AlbumUnlockSheet { password in
                 await viewModel.unlock(password: password)
             }
-        }
-        .sheet(isPresented: $showComments) {
-            AlbumCommentsSheet(viewModel: commentsViewModel)
         }
         .fullScreenCover(item: $selectedMediaForFullscreen) { item in
             ZStack {
@@ -100,6 +93,16 @@ struct AlbumDetailView: View {
                     Task { await viewModel.loadNextPageIfPossible() }
                 }
             }
+        }
+        .overlay(alignment: .bottomTrailing) {
+            AlbumLikeFloatingButton(
+                liked: likeViewModel.liked,
+                isLoading: likeViewModel.isLoading
+            ) {
+                Task { await likeViewModel.toggle() }
+            }
+            .padding(.trailing, 16)
+            .padding(.bottom, 24)
         }
     }
 
@@ -126,22 +129,6 @@ struct AlbumDetailView: View {
             .font(.caption)
             .foregroundStyle(.secondary)
 
-            HStack(spacing: 12) {
-                Button {
-                    Task { await likeViewModel.toggle() }
-                } label: {
-                    Label(likeViewModel.liked ? String(localized: "Liked") : String(localized: "Like"), systemImage: likeViewModel.liked ? "heart.fill" : "heart")
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(likeViewModel.liked ? .pink : .accentColor)
-
-                Button {
-                    showComments = true
-                } label: {
-                    Image(systemName: "text.bubble")
-                }
-                .buttonStyle(.bordered)
-            }
         }
     }
 
@@ -159,6 +146,37 @@ struct AlbumDetailView: View {
         } else {
             card
         }
+    }
+}
+
+private struct AlbumLikeFloatingButton: View {
+    let liked: Bool
+    let isLoading: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Group {
+                if isLoading {
+                    ProgressView()
+                        .controlSize(.small)
+                } else {
+                    Image(systemName: liked ? "heart.fill" : "heart")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(liked ? .pink : Color.black.opacity(0.8))
+                }
+            }
+            .frame(width: 58, height: 58)
+            .background(Color.white)
+            .clipShape(Circle())
+            .overlay(
+                Circle()
+                    .stroke(Color.black.opacity(0.08), lineWidth: 1)
+            )
+            .shadow(color: Color.black.opacity(0.16), radius: 14, x: 0, y: 6)
+        }
+        .buttonStyle(.plain)
+        .disabled(isLoading)
     }
 }
 
