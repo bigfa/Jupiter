@@ -1,0 +1,199 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="980" viewBox="0 0 1440 980">
+  <defs>
+    <style>
+      .bg { fill: #f4f5f7; }
+      .card { fill: #ffffff; stroke: #e4e7ec; stroke-width: 1.2; }
+      .title { font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif; font-size: 24px; fill: #121926; font-weight: 600; }
+      .sub { font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; fill: #667085; }
+      .icon { color: #111827; }
+    </style>
+
+    <symbol id="meta-camera" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="8" width="20" height="12" rx="2.5"/>
+        <path d="M8 8l1.4-2h5.2L16 8"/>
+        <circle cx="12" cy="14" r="3.5"/>
+        <circle cx="18" cy="11" r="0.9"/>
+      </g>
+    </symbol>
+
+    <symbol id="meta-lens" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="8.5"/>
+        <circle cx="12" cy="12" r="5"/>
+        <circle cx="12" cy="12" r="2"/>
+      </g>
+    </symbol>
+
+    <symbol id="meta-aperture" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="8.5"/>
+        <path d="M12 12L8.3 5.8M12 12L16.5 6.6M12 12L19 10.9M12 12L16.8 17.1M12 12L10.2 19M12 12L5.4 15.4"/>
+        <circle cx="12" cy="12" r="2"/>
+      </g>
+    </symbol>
+
+    <symbol id="meta-shutter" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="8.5"/>
+        <path d="M12 8v4l3 2"/>
+        <path d="M7 4.5L5 6.5"/>
+      </g>
+    </symbol>
+
+    <symbol id="meta-iso" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="7" y="7" width="10" height="10" rx="2"/>
+        <path d="M10 10h4v4h-4z"/>
+        <path d="M4 9h3M4 12h3M4 15h3M17 9h3M17 12h3M17 15h3"/>
+      </g>
+    </symbol>
+
+    <symbol id="meta-focal" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="2.5"/>
+        <path d="M3 12h6M15 12h6"/>
+        <path d="M5 10l-2 2 2 2M19 10l2 2-2 2"/>
+      </g>
+    </symbol>
+
+    <symbol id="meta-format" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M7 3h7l4 4v14H7z"/>
+        <path d="M14 3v5h5"/>
+        <path d="M9 13h6M9 17h6"/>
+      </g>
+    </symbol>
+
+    <symbol id="meta-capture-time" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="5" width="16" height="15" rx="2"/>
+        <path d="M8 3v4M16 3v4M4 9h16"/>
+        <circle cx="12" cy="14" r="2.8"/>
+        <path d="M12 12.8v1.6l1.2.8"/>
+      </g>
+    </symbol>
+
+    <symbol id="meta-gps" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="6"/>
+        <circle cx="12" cy="12" r="1.5"/>
+        <path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>
+      </g>
+    </symbol>
+
+    <symbol id="meta-location" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 21s6-6.2 6-10a6 6 0 1 0-12 0c0 3.8 6 10 6 10z"/>
+        <circle cx="12" cy="11" r="2.2"/>
+      </g>
+    </symbol>
+
+    <symbol id="meta-tag" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 11l8-8h7v7l-8 8-7-7z"/>
+        <circle cx="14.5" cy="6.5" r="1"/>
+      </g>
+    </symbol>
+
+    <symbol id="meta-category" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="4" width="7" height="7" rx="1.5"/>
+        <rect x="13" y="4" width="7" height="7" rx="1.5"/>
+        <rect x="4" y="13" width="7" height="7" rx="1.5"/>
+        <rect x="13" y="13" width="7" height="7" rx="1.5"/>
+      </g>
+    </symbol>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1440" height="980"/>
+  <text x="60" y="72" class="title" style="font-size:32px;">Metadata 图标预览（线性风格）</text>
+  <text x="60" y="104" class="sub">24px / stroke 1.8 / round cap &amp; join / currentColor</text>
+
+  <!-- Row 1 -->
+  <g transform="translate(60,140)">
+    <rect class="card" x="0" y="0" width="300" height="230" rx="18"/>
+    <g class="icon"><use href="#meta-camera" x="126" y="54" width="48" height="48"/></g>
+    <text class="title" x="150" y="150" text-anchor="middle">相机</text>
+    <text class="sub" x="150" y="182" text-anchor="middle">camera</text>
+  </g>
+
+  <g transform="translate(390,140)">
+    <rect class="card" x="0" y="0" width="300" height="230" rx="18"/>
+    <g class="icon"><use href="#meta-lens" x="126" y="54" width="48" height="48"/></g>
+    <text class="title" x="150" y="150" text-anchor="middle">镜头</text>
+    <text class="sub" x="150" y="182" text-anchor="middle">lens</text>
+  </g>
+
+  <g transform="translate(720,140)">
+    <rect class="card" x="0" y="0" width="300" height="230" rx="18"/>
+    <g class="icon"><use href="#meta-aperture" x="126" y="54" width="48" height="48"/></g>
+    <text class="title" x="150" y="150" text-anchor="middle">光圈</text>
+    <text class="sub" x="150" y="182" text-anchor="middle">aperture</text>
+  </g>
+
+  <g transform="translate(1050,140)">
+    <rect class="card" x="0" y="0" width="300" height="230" rx="18"/>
+    <g class="icon"><use href="#meta-shutter" x="126" y="54" width="48" height="48"/></g>
+    <text class="title" x="150" y="150" text-anchor="middle">快门</text>
+    <text class="sub" x="150" y="182" text-anchor="middle">shutter</text>
+  </g>
+
+  <!-- Row 2 -->
+  <g transform="translate(60,400)">
+    <rect class="card" x="0" y="0" width="300" height="230" rx="18"/>
+    <g class="icon"><use href="#meta-iso" x="126" y="54" width="48" height="48"/></g>
+    <text class="title" x="150" y="150" text-anchor="middle">ISO</text>
+    <text class="sub" x="150" y="182" text-anchor="middle">iso</text>
+  </g>
+
+  <g transform="translate(390,400)">
+    <rect class="card" x="0" y="0" width="300" height="230" rx="18"/>
+    <g class="icon"><use href="#meta-focal" x="126" y="54" width="48" height="48"/></g>
+    <text class="title" x="150" y="150" text-anchor="middle">焦距</text>
+    <text class="sub" x="150" y="182" text-anchor="middle">focal length</text>
+  </g>
+
+  <g transform="translate(720,400)">
+    <rect class="card" x="0" y="0" width="300" height="230" rx="18"/>
+    <g class="icon"><use href="#meta-format" x="126" y="54" width="48" height="48"/></g>
+    <text class="title" x="150" y="150" text-anchor="middle">格式</text>
+    <text class="sub" x="150" y="182" text-anchor="middle">format</text>
+  </g>
+
+  <g transform="translate(1050,400)">
+    <rect class="card" x="0" y="0" width="300" height="230" rx="18"/>
+    <g class="icon"><use href="#meta-capture-time" x="126" y="54" width="48" height="48"/></g>
+    <text class="title" x="150" y="150" text-anchor="middle">拍摄时间</text>
+    <text class="sub" x="150" y="182" text-anchor="middle">capture time</text>
+  </g>
+
+  <!-- Row 3 -->
+  <g transform="translate(60,660)">
+    <rect class="card" x="0" y="0" width="300" height="230" rx="18"/>
+    <g class="icon"><use href="#meta-gps" x="126" y="54" width="48" height="48"/></g>
+    <text class="title" x="150" y="150" text-anchor="middle">经纬度</text>
+    <text class="sub" x="150" y="182" text-anchor="middle">gps</text>
+  </g>
+
+  <g transform="translate(390,660)">
+    <rect class="card" x="0" y="0" width="300" height="230" rx="18"/>
+    <g class="icon"><use href="#meta-location" x="126" y="54" width="48" height="48"/></g>
+    <text class="title" x="150" y="150" text-anchor="middle">位置</text>
+    <text class="sub" x="150" y="182" text-anchor="middle">location</text>
+  </g>
+
+  <g transform="translate(720,660)">
+    <rect class="card" x="0" y="0" width="300" height="230" rx="18"/>
+    <g class="icon"><use href="#meta-tag" x="126" y="54" width="48" height="48"/></g>
+    <text class="title" x="150" y="150" text-anchor="middle">标签</text>
+    <text class="sub" x="150" y="182" text-anchor="middle">tag</text>
+  </g>
+
+  <g transform="translate(1050,660)">
+    <rect class="card" x="0" y="0" width="300" height="230" rx="18"/>
+    <g class="icon"><use href="#meta-category" x="126" y="54" width="48" height="48"/></g>
+    <text class="title" x="150" y="150" text-anchor="middle">分类</text>
+    <text class="sub" x="150" y="182" text-anchor="middle">category</text>
+  </g>
+</svg>

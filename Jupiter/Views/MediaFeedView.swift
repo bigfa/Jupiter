@@ -525,7 +525,9 @@ private struct AppInfoSheet: View {
     private let authorEmailURL = URL(string: "mailto:jigoulee@gmail.com")!
 
     private var appVersion: String {
-        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "—"
+        return "\(version) (\(build))"
     }
 
     var body: some View {

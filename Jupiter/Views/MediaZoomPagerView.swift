@@ -348,16 +348,33 @@ private struct MediaMetadataInfoSheet: View {
     let item: MediaItem
 
     @Environment(\.dismiss) private var dismiss
+    @State private var contentHeight: CGFloat = 260
+
+    private var fittedDetentHeight: CGFloat {
+        let windowInsets = UIApplication.currentKeyWindowSafeAreaInsets
+        let topBarHeight: CGFloat = 56
+        let minHeight: CGFloat = 240
+        let maxHeight = UIScreen.main.bounds.height - max(windowInsets.top, 0) - 20
+        let ideal = contentHeight + topBarHeight + windowInsets.bottom
+        return min(max(ideal, minHeight), max(minHeight, maxHeight))
+    }
 
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
                 MediaItemInfoView(item: item)
                     .padding(16)
+                    .background(
+                        GeometryReader { proxy in
+                            Color.clear
+                                .preference(
+                                    key: MetadataContentHeightPreferenceKey.self,
+                                    value: proxy.size.height
+                                )
+                        }
+                    )
             }
             .background(Color.white)
-            .navigationTitle("Metadata")
-            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") {
@@ -366,6 +383,23 @@ private struct MediaMetadataInfoSheet: View {
                 }
             }
         }
+        .presentationDetents([.height(fittedDetentHeight), .large])
+        .presentationContentInteraction(.scrolls)
+        .onPreferenceChange(MetadataContentHeightPreferenceKey.self) { newValue in
+            guard newValue > 0 else { return }
+            let rounded = ceil(newValue)
+            if abs(contentHeight - rounded) > 1 {
+                contentHeight = rounded
+            }
+        }
+    }
+}
+
+private struct MetadataContentHeightPreferenceKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = max(value, nextValue())
     }
 }
 
@@ -387,5 +421,165 @@ private struct MediaZoomPagerPreviewWrapper: View {
 struct MediaZoomPagerView_Previews: PreviewProvider {
     static var previews: some View {
         MediaZoomPagerPreviewWrapper()
+    }
+}
+
+private struct MetadataDrawer: View {
+    let item: MediaItem?
+    @Binding var height: CGFloat
+    let collapsedHeight: CGFloat
+    let mediumHeight: CGFloat
+    let expandedHeight: CGFloat
+    let bottomInset: CGFloat
+    @State private var dragStartHeight: CGFloat? = nil
+    @State private var likeViewModel: MediaLikeViewModel?
+
+    private var currentHeight: CGFloat { height }
+    private var anchors: [CGFloat] { [collapsedHeight, mediumHeight, expandedHeight] }
+    private var isExpanded: Bool { height > collapsedHeight + 6 }
+    private var effectiveBottomInset: CGFloat {
+        // Prefer dynamic safe area from either parent geometry or key window.
+        let windowBottom = UIApplication.currentKeyWindowSafeAreaInsets.bottom
+        let resolvedBottom = max(bottomInset, windowBottom)
+        return resolvedBottom > 0 ? resolvedBottom : 8
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 10) {
+                Capsule()
+                    .fill(Color.secondary.opacity(0.4))
+                    .frame(width: 36, height: 5)
+                    .padding(.top, 8)
+                    .frame(maxWidth: .infinity)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        cycleHeight()
+                    }
+
+                HStack {
+                    Button {
+                        cycleHeight()
+                    } label: {
+                        Text("Metadata", bundle: .main)
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+
+                    if let likeViewModel {
+                        HStack(spacing: 8) {
+                            if likeViewModel.likes > 0 {
+                                Text("♥︎ \(likeViewModel.likes)")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Button {
+                                Task { await likeViewModel.toggle() }
+                            } label: {
+                                Group {
+                                    if likeViewModel.isLoading {
+                                        ProgressView()
+                                            .controlSize(.small)
+                                    } else {
+                                        Image(systemName: likeViewModel.liked ? "heart.fill" : "heart")
+                                            .font(.body)
+                                            .foregroundStyle(likeViewModel.liked ? .pink : .secondary)
+                                    }
+                                }
+                                .frame(width: 22, height: 22)
+                            }
+                            .buttonStyle(.plain)
+                            .contentShape(Rectangle())
+                            .disabled(likeViewModel.isLoading)
+                        }
+                    }
+                }
+                .padding(.bottom, 2)
+
+                if let message = likeViewModel?.errorMessage, !message.isEmpty {
+                    Text(message)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                        .lineLimit(2)
+                }
+            }
+            .padding(.horizontal, 16)
+
+            ScrollView(showsIndicators: false) {
+                if let item {
+                    MediaItemInfoView(item: item)
+                        .padding(.top, 4)
+                }
+            }
+            .padding(.horizontal, 16)
+            .opacity(isExpanded ? 1 : 0)
+
+            Spacer(minLength: 0)
+        }
+        .padding(.bottom, effectiveBottomInset)
+        .frame(height: currentHeight + effectiveBottomInset)
+        .background(.ultraThinMaterial)
+        .clipShape(
+            UnevenRoundedRectangle(
+                cornerRadii: .init(topLeading: 22, bottomLeading: 0, bottomTrailing: 0, topTrailing: 22),
+                style: .continuous
+            )
+        )
+        .gesture(
+            DragGesture(minimumDistance: 12, coordinateSpace: .global)
+                .onChanged { value in
+                    if dragStartHeight == nil {
+                        dragStartHeight = height
+                    }
+                    let base = dragStartHeight ?? height
+                    let next = clampHeight(base - value.translation.height)
+                    height = next
+                }
+                .onEnded { value in
+                    let base = dragStartHeight ?? height
+                    dragStartHeight = nil
+                    let projected = clampHeight(base - value.predictedEndTranslation.height)
+                    let target = nearestAnchor(to: projected)
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                        height = target
+                    }
+                }
+        )
+        .onAppear {
+            height = nearestAnchor(to: height)
+        }
+        .task(id: item?.id) {
+            guard let item else {
+                likeViewModel = nil
+                return
+            }
+            let vm = MediaLikeViewModel(mediaId: item.id)
+            likeViewModel = vm
+            await vm.load()
+        }
+    }
+
+    private func clampHeight(_ value: CGFloat) -> CGFloat {
+        min(max(value, collapsedHeight), expandedHeight)
+    }
+
+    private func nearestAnchor(to value: CGFloat) -> CGFloat {
+        anchors.min(by: { abs($0 - value) < abs($1 - value) }) ?? collapsedHeight
+    }
+
+    private func cycleHeight() {
+        let next: CGFloat
+        if abs(height - collapsedHeight) < 2 {
+            next = mediumHeight
+        } else if abs(height - mediumHeight) < 2 {
+            next = expandedHeight
+        } else {
+            next = collapsedHeight
+        }
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+            height = next
+        }
     }
 }
