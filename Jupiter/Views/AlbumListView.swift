@@ -3,9 +3,11 @@ import SwiftUI
 struct AlbumListView: View {
     @Binding var rootSelection: RootSection
     @StateObject private var viewModel = AlbumListViewModel()
+    private let cardSpacing: CGFloat = 14
+    private let horizontalPadding: CGFloat = 14
 
     private let columns = [
-        GridItem(.flexible(), spacing: 12)
+        GridItem(.flexible(), spacing: 14)
     ]
 
     init(rootSelection: Binding<RootSection> = .constant(.albums)) {
@@ -15,13 +17,13 @@ struct AlbumListView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 12) {
+                VStack(spacing: cardSpacing) {
                     if viewModel.isLoading && viewModel.albums.isEmpty {
                         AlbumListSkeletonView()
-                            .padding(.horizontal, 12)
-                            .padding(.top, 12)
+                            .padding(.horizontal, horizontalPadding)
+                            .padding(.top, 14)
                     } else {
-                        LazyVGrid(columns: columns, spacing: 12) {
+                        LazyVGrid(columns: columns, spacing: cardSpacing) {
                             ForEach(viewModel.albums) { album in
                                 NavigationLink(value: album) {
                                     AlbumCard(album: album)
@@ -32,12 +34,12 @@ struct AlbumListView: View {
                                 .buttonStyle(.plain)
                             }
                         }
-                        .padding(.horizontal, 12)
-                        .padding(.top, 12)
+                        .padding(.horizontal, horizontalPadding)
+                        .padding(.top, 14)
 
                         if viewModel.isLoading && !viewModel.albums.isEmpty {
                             AlbumListLoadMoreSkeleton()
-                                .padding(.horizontal, 12)
+                                .padding(.horizontal, horizontalPadding)
                         } else if !viewModel.albums.isEmpty && !viewModel.canLoadMore {
                             Text("No more")
                                 .font(.caption)
@@ -59,7 +61,7 @@ struct AlbumListView: View {
                 ) {
                     Task { await viewModel.applyFilters() }
                 }
-                .padding(.horizontal, 12)
+                .padding(.horizontal, horizontalPadding)
                 .padding(.top, 12)
                 .padding(.bottom, 8)
                 .background(Color(.systemBackground))
@@ -154,24 +156,28 @@ struct AlbumListView_Previews: PreviewProvider {
 }
 
 private struct AlbumListSkeletonView: View {
+    private let skeletonHeight: CGFloat = 236
+
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 14) {
             ForEach(0..<5, id: \.self) { _ in
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
                     .fill(Color(.systemGray5))
-                    .frame(height: 190)
+                    .frame(height: skeletonHeight)
             }
         }
     }
 }
 
 private struct AlbumListLoadMoreSkeleton: View {
+    private let skeletonHeight: CGFloat = 236
+
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 14) {
             ForEach(0..<2, id: \.self) { _ in
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
                     .fill(Color(.systemGray5))
-                    .frame(height: 190)
+                    .frame(height: skeletonHeight)
             }
         }
         .padding(.bottom, 12)

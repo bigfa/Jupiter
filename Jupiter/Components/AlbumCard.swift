@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AlbumCard: View {
     let album: AlbumListItem
+    private let cardHeight: CGFloat = 236
 
     private var coverURL: URL? {
         if let cover = album.coverMedia {
@@ -13,46 +14,51 @@ struct AlbumCard: View {
     var body: some View {
         ZStack(alignment: .bottomLeading) {
             RemoteImage(url: coverURL, contentMode: .fill)
-                .frame(height: 190)
+                .frame(height: cardHeight)
                 .frame(maxWidth: .infinity)
                 .background(Color(.secondarySystemBackground))
                 .overlay {
                     LinearGradient(
                         colors: [
-                            Color.black.opacity(0.05),
-                            Color.black.opacity(0.25),
-                            Color.black.opacity(0.6)
+                            Color.black.opacity(0.02),
+                            Color.black.opacity(0.12),
+                            Color.black.opacity(0.38),
+                            Color.black.opacity(0.72)
                         ],
                         startPoint: .top,
                         endPoint: .bottom
                     )
                 }
+                .overlay {
+                    LinearGradient(
+                        colors: [
+                            Color.white.opacity(0.20),
+                            Color.clear,
+                            Color.clear
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .center
+                    )
+                }
 
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 8) {
                 Text(album.title)
-                    .font(.headline.weight(.semibold))
+                    .font(.system(size: 28, weight: .semibold, design: .serif))
+                    .tracking(0.2)
                     .foregroundStyle(.white)
-                    .lineLimit(1)
+                    .lineLimit(2)
+                    .shadow(color: Color.black.opacity(0.18), radius: 8, x: 0, y: 4)
 
                 if let description = album.description, !description.isEmpty {
                     Text(description)
-                        .font(.caption)
-                        .foregroundStyle(Color.white.opacity(0.88))
+                        .font(.system(size: 13, weight: .medium, design: .default))
+                        .foregroundStyle(Color.white.opacity(0.82))
                         .lineLimit(2)
+                        .lineSpacing(1.5)
                 }
-
-                HStack(spacing: 8) {
-                    if let count = album.mediaCount {
-                        Text("\(count) photos")
-                    }
-                    if let likes = album.likes, likes > 0 {
-                        Text("♥︎ \(likes)")
-                    }
-                }
-                .font(.caption2)
-                .foregroundStyle(Color.white.opacity(0.9))
             }
-            .padding(12)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 16)
             .frame(maxWidth: .infinity, alignment: .leading)
 
             if album.isProtected == true {
@@ -62,17 +68,22 @@ struct AlbumCard: View {
                         Label("Locked", systemImage: "lock.fill")
                             .font(.caption2)
                             .foregroundStyle(Color.white)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 5)
-                            .background(Color.black.opacity(0.35))
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(Color.black.opacity(0.22))
                             .clipShape(Capsule())
                     }
                     Spacer()
                 }
-                .padding(10)
+                .padding(14)
             }
         }
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .stroke(Color.white.opacity(0.18), lineWidth: 1)
+        )
+        .shadow(color: Color.black.opacity(0.10), radius: 18, x: 0, y: 10)
     }
 }
 

@@ -5,6 +5,7 @@
 
     },
     "%lld photos" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

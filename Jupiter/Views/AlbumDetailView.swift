@@ -48,7 +48,7 @@ struct AlbumDetailView: View {
                 }
             }
         }
-        .navigationTitle("Album")
+        .navigationTitle(viewModel.album?.title ?? preview?.title ?? String(localized: "Album"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .tabBar)
         .overlay {
@@ -108,27 +108,12 @@ struct AlbumDetailView: View {
 
     @ViewBuilder
     private var headerSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(viewModel.album?.title ?? preview?.title ?? String(localized: "Album"))
-                .font(.title2.bold())
-
-            if let description = viewModel.album?.description ?? preview?.description, !description.isEmpty {
+        if let description = viewModel.album?.description ?? preview?.description, !description.isEmpty {
+            VStack(alignment: .leading, spacing: 8) {
                 Text(description)
                     .font(.callout)
                     .foregroundStyle(.secondary)
             }
-
-            HStack(spacing: 12) {
-                if let count = viewModel.album?.mediaCount ?? preview?.mediaCount {
-                    Text("\(count) photos")
-                }
-                if likeViewModel.likes > 0 {
-                    Text("♥︎ \(likeViewModel.likes)")
-                }
-            }
-            .font(.caption)
-            .foregroundStyle(.secondary)
-
         }
     }
 

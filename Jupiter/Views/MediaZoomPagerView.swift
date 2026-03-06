@@ -10,6 +10,8 @@ struct MediaZoomPagerView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var isVerticalDragging: Bool = false
     @State private var showMetadata = false
+    @State private var pageSlideOffset: CGFloat = 0
+    @State private var isPageAnimating = false
 
     init(items: [MediaItem], startId: String, namespace: Namespace.ID, onReachEnd: (() -> Void)? = nil) {
         self.items = items
@@ -29,24 +31,24 @@ struct MediaZoomPagerView: View {
                 Color.black
                     .ignoresSafeArea()
 
-                TabView(selection: $selection) {
-                    ForEach(items.indices, id: \.self) { index in
+                Group {
+                    if items.indices.contains(selection) {
                         MediaZoomDetailPage(
-                            item: items[index],
+                            item: items[selection],
                             safeTopInset: safeTopInset,
                             safeBottomInset: safeBottomInset,
                             isVerticalDragging: $isVerticalDragging,
-                            onShowPrevious: { showPrevious() },
-                            onShowNext: { showNext() },
+                            onShowPrevious: { showPrevious(containerWidth: geometry.size.width) },
+                            onShowNext: { showNext(containerWidth: geometry.size.width) },
                             onClose: { handleClose() }
                         )
-                        .tag(index)
+                        .id(items[selection].id)
+                        .offset(x: pageSlideOffset)
                     }
                 }
-                .tabViewStyle(.page(indexDisplayMode: .never))
                 .background(Color.black)
                 .ignoresSafeArea()
-                .allowsHitTesting(!isVerticalDragging)
+                .allowsHitTesting(!isVerticalDragging && !isPageAnimating)
 
                 Button {
                     showMetadata = true
@@ -63,7 +65,7 @@ struct MediaZoomPagerView: View {
                 .padding(.trailing, 16)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
                 .zIndex(30)
-                .allowsHitTesting(!isVerticalDragging)
+                .allowsHitTesting(!isVerticalDragging && !isPageAnimating)
             }
         }
         .ignoresSafeArea()
@@ -98,23 +100,57 @@ struct MediaZoomPagerView: View {
         return items[selection]
     }
 
-    private func showPrevious() {
+    private func showPrevious(containerWidth: CGFloat) {
         guard selection > 0 else { return }
-        withAnimation(.easeInOut(duration: 0.22)) {
-            selection -= 1
-        }
+        animatePageChange(
+            to: selection - 1,
+            direction: .previous,
+            containerWidth: containerWidth
+        )
     }
 
-    private func showNext() {
+    private func showNext(containerWidth: CGFloat) {
         let next = selection + 1
         guard items.indices.contains(next) else {
             onReachEnd?()
             return
         }
-        withAnimation(.easeInOut(duration: 0.22)) {
-            selection = next
+        animatePageChange(
+            to: next,
+            direction: .next,
+            containerWidth: containerWidth
+        )
+    }
+
+    private func animatePageChange(to targetIndex: Int, direction: PageDirection, containerWidth: CGFloat) {
+        guard !isPageAnimating else { return }
+        guard items.indices.contains(targetIndex) else { return }
+
+        let width = max(1, containerWidth)
+        let outboundOffset: CGFloat = direction == .next ? -width : width
+        let inboundOffset: CGFloat = -outboundOffset
+        isPageAnimating = true
+
+        withAnimation(.easeInOut(duration: 0.15)) {
+            pageSlideOffset = outboundOffset
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            selection = targetIndex
+            pageSlideOffset = inboundOffset
+            withAnimation(.easeInOut(duration: 0.20)) {
+                pageSlideOffset = 0
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.20) {
+                isPageAnimating = false
+            }
         }
     }
+}
+
+private enum PageDirection {
+    case previous
+    case next
 }
 
 private extension UIApplication {
@@ -289,9 +325,6 @@ struct MediaZoomDetailPage: View {
 
                 guard axis == .vertical else {
                     handleHorizontalSwipe(value)
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                        dragOffset = .zero
-                    }
                     return
                 }
 
