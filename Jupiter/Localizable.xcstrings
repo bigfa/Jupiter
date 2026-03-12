@@ -142,6 +142,39 @@
         }
       }
     },
+    "Automatically sync status across all devices" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatically sync status across all devices"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在您的所有设备间自动同步权益状态"
+          }
+        }
+      }
+    },
+    "Buy Once, Download Forever" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buy Once, Download Forever"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一次购买，永久下载"
+          }
+        }
+      }
+    },
     "Camera" : {
       "localizations" : {
         "en" : {
@@ -222,6 +255,22 @@
         }
       }
     },
+    "Contact Author" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contact Author"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "联系作者"
+          }
+        }
+      }
+    },
     "Done" : {
       "localizations" : {
         "en" : {
@@ -238,6 +287,54 @@
         }
       }
     },
+    "Download Benefits" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Download Benefits"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下载权益"
+          }
+        }
+      }
+    },
+    "Download benefits locked" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Download benefits locked"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尚未解锁下载权益"
+          }
+        }
+      }
+    },
+    "Download benefits unlocked" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Download benefits unlocked"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已解锁下载权益"
+          }
+        }
+      }
+    },
     "Download failed" : {
       "localizations" : {
         "en" : {
@@ -250,6 +347,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "下载失败"
+          }
+        }
+      }
+    },
+    "Download photos in their highest resolution" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Download photos in their highest resolution"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "以最高分辨率下载保存照片"
           }
         }
       }
@@ -446,6 +560,23 @@
         }
       }
     },
+    "Lifetime Access" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lifetime Access"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "永久使用"
+          }
+        }
+      }
+    },
     "Like" : {
       "localizations" : {
         "en" : {
@@ -562,6 +693,23 @@
         }
       }
     },
+    "No ads or hidden tracking" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No ads or hidden tracking"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无广告、无订阅、无额外追踪"
+          }
+        }
+      }
+    },
     "No comments yet" : {
       "localizations" : {
         "en" : {
@@ -626,6 +774,39 @@
         }
       }
     },
+    "No purchase history found." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No purchase history found."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未找到可恢复的购买记录。"
+          }
+        }
+      }
+    },
+    "Notes" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notes"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "注意事项"
+          }
+        }
+      }
+    },
     "OK" : {
       "localizations" : {
         "en" : {
@@ -638,6 +819,90 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "确定"
+          }
+        }
+      }
+    },
+    "One-time purchase" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One-time purchase"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一次性买断"
+          }
+        }
+      }
+    },
+    "One-time purchase (%@)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One-time purchase (%@)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一次性购买 (%@)"
+          }
+        }
+      }
+    },
+    "One-time purchase, no recurring fees" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One-time purchase, no recurring fees"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一次性买断，无后续费用"
+          }
+        }
+      }
+    },
+    "One-time purchase, permanently unlock original image downloads" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One-time purchase, permanently unlock original image downloads"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一次性购买，永久解锁原图下载"
+          }
+        }
+      }
+    },
+    "Original Quality" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Original Quality"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "原始画质"
           }
         }
       }
@@ -722,6 +987,22 @@
         }
       }
     },
+    "Premium Access" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Premium Access"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尊享权益"
+          }
+        }
+      }
+    },
     "Privacy Policy" : {
       "localizations" : {
         "en" : {
@@ -750,6 +1031,141 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "处理中"
+          }
+        }
+      }
+    },
+    "Purchase failed, please try again" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Purchase failed, please try again"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "购买过程出错，请重试"
+          }
+        }
+      }
+    },
+    "Purchase Info" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Purchase Info"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "购买提示"
+          }
+        }
+      }
+    },
+    "Purchase is processing, please try again on this page later." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Purchase is processing, please try again on this page later."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "购买处理中，请稍后在本页重试。"
+          }
+        }
+      }
+    },
+    "Purchase item unavailable" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Purchase item unavailable"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "购买项暂不可用"
+          }
+        }
+      }
+    },
+    "Purchase not effective, please try again" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Purchase not effective, please try again"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "购买未生效，请重试"
+          }
+        }
+      }
+    },
+    "Purchase Notes" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Purchase Notes"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "购买说明"
+          }
+        }
+      }
+    },
+    "Purchase verification failed" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Purchase verification failed"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "支付校验失败"
+          }
+        }
+      }
+    },
+    "Purchased" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Purchased"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已解锁"
           }
         }
       }
@@ -786,6 +1202,56 @@
         }
       }
     },
+    "Restore failed, please try again" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore failed, please try again"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "恢复失败，请重试"
+          }
+        }
+      }
+    },
+    "Restore on any device with same Apple ID" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore on any device with same Apple ID"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在同一 Apple ID 设备上恢复权益"
+          }
+        }
+      }
+    },
+    "Restore Purchase" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore Purchase"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "恢复购买"
+          }
+        }
+      }
+    },
     "Retry" : {
       "localizations" : {
         "en" : {
@@ -798,6 +1264,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "重试"
+          }
+        }
+      }
+    },
+    "Save high-definition original images to your library" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save high-definition original images to your library"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "高清原图保存到系统相册"
           }
         }
       }
@@ -830,6 +1312,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已保存到相册"
+          }
+        }
+      }
+    },
+    "Secured by Apple App Store" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Secured by Apple App Store"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple App Store 安全支付"
           }
         }
       }
@@ -914,6 +1413,23 @@
         }
       }
     },
+    "Sync Everywhere" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sync Everywhere"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "多端同步"
+          }
+        }
+      }
+    },
     "Tags" : {
       "localizations" : {
         "en" : {
@@ -978,6 +1494,23 @@
         }
       }
     },
+    "Unknown purchase status" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unknown purchase status"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未知购买状态"
+          }
+        }
+      }
+    },
     "Unlock" : {
       "localizations" : {
         "en" : {
@@ -1010,6 +1543,22 @@
         }
       }
     },
+    "Unlocked" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unlocked"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已解锁"
+          }
+        }
+      }
+    },
     "Version" : {
       "localizations" : {
         "en" : {
@@ -1027,67 +1576,28 @@
       }
     },
     "Website (optional)" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Website (optional)"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "网站（可选）"
-          }
-        }
-      }
+
     },
     "下载" : {
-      "comment" : "A button label that says \"Download\".",
-      "isCommentAutoGenerated" : true
+
     },
     "下载提示" : {
-      "comment" : "A title for an alert that appears when the user tries to download an image but doesn't have permission.",
-      "isCommentAutoGenerated" : true
-    },
-    "下载需要解锁" : {
-      "comment" : "A confirmation dialog title when trying to download an image that requires in-app purchase.",
-      "isCommentAutoGenerated" : true
+
     },
     "加载失败" : {
-      "comment" : "An error message indicating that loading has failed.",
-      "isCommentAutoGenerated" : true
-    },
-    "取消" : {
-      "comment" : "The label of a button that dismisses an alert.",
-      "isCommentAutoGenerated" : true
+
     },
     "好的" : {
-      "comment" : "The text for an \"OK\" button.",
-      "isCommentAutoGenerated" : true
-    },
-    "恢复购买" : {
-      "comment" : "A button that restores a purchase and downloads the media item if necessary.",
-      "isCommentAutoGenerated" : true
+
     },
     "没有更多了" : {
-      "comment" : "A text indicating that there are no more items to load.",
-      "isCommentAutoGenerated" : true
-    },
-    "联系作者" : {
-      "comment" : "A link that, when tapped, opens the author's email.",
-      "isCommentAutoGenerated" : true
-    },
-    "购买后可下载原图到系统相册。" : {
 
     },
     "这个相册还没有照片" : {
-      "comment" : "A description text displayed when an album has no photos.",
-      "isCommentAutoGenerated" : true
+
     },
     "重试" : {
-      "comment" : "A button label that means \"retry\".",
-      "isCommentAutoGenerated" : true
+
     }
   },
   "version" : "1.1"

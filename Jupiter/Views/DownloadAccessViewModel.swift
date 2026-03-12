@@ -39,9 +39,9 @@ final class DownloadAccessViewModel: ObservableObject {
 
     var purchaseButtonTitle: String {
         if let priceText {
-            return "一次性购买（\(priceText)）"
+            return "One-time purchase (\(priceText))"
         }
-        return "一次性购买"
+        return "One-time purchase"
     }
 
     func prepare() async {
@@ -58,7 +58,7 @@ final class DownloadAccessViewModel: ObservableObject {
             await loadProduct()
         }
         guard let product else {
-            return .failed("购买项不可用，请检查产品配置")
+            return .failed("Purchase item unavailable")
         }
 
         isProcessing = true
@@ -69,20 +69,20 @@ final class DownloadAccessViewModel: ObservableObject {
             switch result {
             case .success(let verification):
                 guard let transaction = verifiedTransaction(from: verification) else {
-                    return .failed("购买校验失败")
+                    return .failed("Purchase verification failed")
                 }
                 await transaction.finish()
                 await refreshEntitlement()
-                return isPurchased ? .purchased : .failed("购买未生效，请稍后重试")
+                return isPurchased ? .purchased : .failed("Purchase not effective, please try again")
             case .pending:
                 return .pending
             case .userCancelled:
                 return .cancelled
             @unknown default:
-                return .failed("未知购买状态")
+                return .failed("Unknown purchase status")
             }
         } catch {
-            return .failed("购买失败，请稍后重试")
+            return .failed("Purchase failed, please try again")
         }
     }
 
@@ -98,7 +98,7 @@ final class DownloadAccessViewModel: ObservableObject {
             }
             return .nothingToRestore
         } catch {
-            return .failed("恢复购买失败，请稍后重试")
+            return .failed("Restore failed, please try again")
         }
     }
 

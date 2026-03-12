@@ -522,8 +522,8 @@ private struct AppInfoSheet: View {
     @State private var showPaywall = false
     @StateObject private var downloadAccessViewModel = DownloadAccessViewModel()
 
-    private let privacyURL = URL(string: "https://bigfa.github.io/Jupiter/legal.html")!
-    private let termsURL = URL(string: "https://bigfa.github.io/Jupiter/legal.html#terms")!
+    private let privacyURL = URL(string: "https://tinyglim.wpista.com/legal.html")!
+    private let termsURL = URL(string: "https://tinyglim.wpista.com/legal.html#terms")!
     private let authorEmailURL = URL(string: "mailto:jigoulee@gmail.com")!
 
     private var appVersion: String {
@@ -542,7 +542,7 @@ private struct AppInfoSheet: View {
                             .foregroundStyle(.secondary)
                     }
 
-                    Link("联系作者", destination: authorEmailURL)
+                    Link("Contact Author", destination: authorEmailURL)
                         .foregroundStyle(.primary)
 
                     Button {
@@ -550,15 +550,15 @@ private struct AppInfoSheet: View {
                     } label: {
                         VStack(alignment: .leading, spacing: 2) {
                             HStack {
-                                Text("下载权益")
+                                Text("Download Benefits")
                                 Spacer()
-                                Text(downloadAccessViewModel.isPurchased ? "已解锁" : "未解锁")
+                                Text(downloadAccessViewModel.isPurchased ? "Unlocked" : "Locked")
                                     .foregroundStyle(downloadAccessViewModel.isPurchased ? .green : .secondary)
                                 Image(systemName: "chevron.right")
                                     .font(.caption2)
                                     .foregroundStyle(.tertiary)
                             }
-                            Text("一次性购买，永久解锁原图下载")
+                            Text("One-time purchase, permanently unlock original image downloads")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
