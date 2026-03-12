@@ -9,6 +9,7 @@ struct AlbumDetailView: View {
     @Namespace private var heroNamespace
     @State private var showUnlock = false
     @State private var selectedMediaForFullscreen: MediaItem? = nil
+    @State private var animatedItemIds: Set<String> = []
     private let spacing: CGFloat = 6
 
     init(albumId: String, preview: AlbumListItem? = nil) {
@@ -21,12 +22,23 @@ struct AlbumDetailView: View {
     var body: some View {
         GeometryReader { proxy in
             ScrollView {
-                VStack(alignment: .leading, spacing: 12) {
+                LazyVStack(alignment: .leading, spacing: 14) {
                     headerSection
                         .padding(.horizontal, 12)
                         .padding(.top, 12)
 
-                    if !viewModel.media.isEmpty {
+                    if viewModel.media.isEmpty && viewModel.isLoading {
+                        AlbumDetailSkeletonView(
+                            width: proxy.size.width,
+                            columnCount: columnCount(for: proxy.size.width),
+                            spacing: spacing
+                        )
+                        .padding(.horizontal, 12)
+                    } else if !viewModel.media.isEmpty {
+                        let itemIndexMap = Dictionary(
+                            uniqueKeysWithValues: viewModel.media.enumerated().map { ($1.id, $0) }
+                        )
+
                         MasonryGrid(
                             items: viewModel.media,
                             width: proxy.size.width,
@@ -37,6 +49,14 @@ struct AlbumDetailView: View {
                                 selectedMediaForFullscreen = item
                             } label: {
                                 thumbnailView(for: item)
+                                    .opacity(animatedItemIds.contains(item.id) ? 1 : 0.01)
+                                    .offset(y: animatedItemIds.contains(item.id) ? 0 : 14)
+                                    .onAppear {
+                                        animateCardIfNeeded(
+                                            id: item.id,
+                                            index: itemIndexMap[item.id] ?? 0
+                                        )
+                                    }
                                     .task {
                                         await viewModel.loadMoreIfNeeded(current: item)
                                     }
@@ -44,32 +64,60 @@ struct AlbumDetailView: View {
                             .buttonStyle(.plain)
                         }
                         .frame(width: proxy.size.width, alignment: .leading)
+
+                        if viewModel.isLoading && viewModel.canLoadMore {
+                            AlbumDetailLoadMoreSkeleton(
+                                columnCount: columnCount(for: proxy.size.width),
+                                spacing: spacing
+                            )
+                            .padding(.horizontal, 12)
+                            .padding(.top, 2)
+                        } else if !viewModel.canLoadMore {
+                            Text("没有更多了")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 10)
+                        }
+                    } else if viewModel.errorMessage == nil && !viewModel.requiresPassword {
+                        AlbumDetailEmptyStateView()
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, 48)
+                            .padding(.horizontal, 20)
                     }
                 }
+                .padding(.bottom, 96)
             }
+            .refreshable {
+                animatedItemIds.removeAll()
+                await viewModel.loadInitial()
+            }
+            .background(
+                LinearGradient(
+                    colors: [
+                        Color.white,
+                        Color(.systemGray6).opacity(0.45)
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .ignoresSafeArea()
+            )
         }
         .navigationTitle(viewModel.album?.title ?? preview?.title ?? String(localized: "Album"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .tabBar)
         .overlay {
-            if viewModel.isLoading && viewModel.media.isEmpty {
-                ProgressView()
-            } else if let message = viewModel.errorMessage, viewModel.media.isEmpty {
-                VStack(spacing: 8) {
-                    Text("Failed to load")
-                        .font(.headline)
-                    Text(message)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Button("Retry") {
-                        Task { await viewModel.loadInitial() }
-                    }
+            if let message = viewModel.errorMessage, viewModel.media.isEmpty {
+                AlbumDetailErrorCard(message: message) {
+                    Task { await viewModel.loadInitial() }
                 }
-                .padding()
+                .padding(.horizontal, 20)
             }
         }
         .task {
             if viewModel.media.isEmpty && !viewModel.isLoading {
+                animatedItemIds.removeAll()
                 await viewModel.loadInitial()
             }
             await likeViewModel.load()
@@ -97,7 +145,8 @@ struct AlbumDetailView: View {
         .overlay(alignment: .bottomTrailing) {
             AlbumLikeFloatingButton(
                 liked: likeViewModel.liked,
-                isLoading: likeViewModel.isLoading
+                isLoading: likeViewModel.isLoading,
+                style: AppConfig.albumLikeButtonStyle
             ) {
                 Task { await likeViewModel.toggle() }
             }
@@ -106,14 +155,47 @@ struct AlbumDetailView: View {
         }
     }
 
+    private func animateCardIfNeeded(id: String, index: Int) {
+        guard !animatedItemIds.contains(id) else { return }
+        let delay = min(Double(index) * 0.015, 0.22)
+        withAnimation(.easeOut(duration: 0.36).delay(delay)) {
+            animatedItemIds.insert(id)
+        }
+    }
+
     @ViewBuilder
     private var headerSection: some View {
         if let description = viewModel.album?.description ?? preview?.description, !description.isEmpty {
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("“")
+                    .font(.system(size: 34, weight: .bold, design: .serif))
+                    .foregroundStyle(Color.black.opacity(0.26))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
                 Text(description)
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
+                    .font(.system(size: 17, weight: .medium, design: .serif))
+                    .lineSpacing(4)
+                    .foregroundStyle(Color.black.opacity(0.72))
             }
+            .padding(16)
+            .background(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color.white.opacity(0.96),
+                                Color(.systemGray6).opacity(0.72)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .stroke(Color.black.opacity(0.07), lineWidth: 1)
+            )
+            .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 8)
         }
     }
 
@@ -137,6 +219,7 @@ struct AlbumDetailView: View {
 private struct AlbumLikeFloatingButton: View {
     let liked: Bool
     let isLoading: Bool
+    let style: AlbumLikeButtonVisualStyle
     let action: () -> Void
 
     var body: some View {
@@ -148,20 +231,151 @@ private struct AlbumLikeFloatingButton: View {
                 } else {
                     Image(systemName: liked ? "heart.fill" : "heart")
                         .font(.system(size: 20, weight: .semibold))
-                        .foregroundStyle(liked ? .pink : Color.black.opacity(0.8))
+                        .foregroundStyle(liked ? .pink : iconColor)
                 }
             }
             .frame(width: 58, height: 58)
-            .background(Color.white)
+            .background(backgroundFill)
             .clipShape(Circle())
             .overlay(
                 Circle()
-                    .stroke(Color.black.opacity(0.08), lineWidth: 1)
+                    .stroke(borderColor, lineWidth: 1)
             )
-            .shadow(color: Color.black.opacity(0.16), radius: 14, x: 0, y: 6)
+            .shadow(color: shadowColor, radius: 14, x: 0, y: 6)
         }
         .buttonStyle(.plain)
         .disabled(isLoading)
+    }
+
+    private var backgroundFill: some ShapeStyle {
+        switch style {
+        case .solidWhite:
+            return AnyShapeStyle(Color.white)
+        case .frosted:
+            return AnyShapeStyle(.ultraThinMaterial)
+        }
+    }
+
+    private var borderColor: Color {
+        switch style {
+        case .solidWhite:
+            return Color.black.opacity(0.08)
+        case .frosted:
+            return Color.white.opacity(0.55)
+        }
+    }
+
+    private var shadowColor: Color {
+        switch style {
+        case .solidWhite:
+            return Color.black.opacity(0.16)
+        case .frosted:
+            return Color.black.opacity(0.12)
+        }
+    }
+
+    private var iconColor: Color {
+        switch style {
+        case .solidWhite:
+            return Color.black.opacity(0.8)
+        case .frosted:
+            return Color.black.opacity(0.76)
+        }
+    }
+}
+
+private struct AlbumDetailSkeletonView: View {
+    let width: CGFloat
+    let columnCount: Int
+    let spacing: CGFloat
+
+    private let heights: [CGFloat] = [180, 240, 210, 260, 220, 190, 250, 205]
+
+    var body: some View {
+        let columns = Array(
+            repeating: GridItem(.flexible(minimum: 0), spacing: spacing),
+            count: max(1, columnCount)
+        )
+
+        LazyVGrid(columns: columns, spacing: spacing) {
+            ForEach(0..<max(columnCount * 4, 8), id: \.self) { index in
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(Color.black.opacity(0.08))
+                    .frame(height: heights[index % heights.count])
+                    .redacted(reason: .placeholder)
+            }
+        }
+        .frame(width: width - 24, alignment: .leading)
+    }
+}
+
+private struct AlbumDetailLoadMoreSkeleton: View {
+    let columnCount: Int
+    let spacing: CGFloat
+
+    var body: some View {
+        let columns = Array(
+            repeating: GridItem(.flexible(minimum: 0), spacing: spacing),
+            count: max(1, columnCount)
+        )
+        LazyVGrid(columns: columns, spacing: spacing) {
+            ForEach(0..<max(columnCount, 2), id: \.self) { index in
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(Color.black.opacity(index == 0 ? 0.08 : 0.06))
+                    .frame(height: index.isMultiple(of: 2) ? 188 : 220)
+                    .redacted(reason: .placeholder)
+            }
+        }
+    }
+}
+
+private struct AlbumDetailEmptyStateView: View {
+    var body: some View {
+        VStack(spacing: 10) {
+            Image(systemName: "photo.on.rectangle.angled")
+                .font(.system(size: 30))
+                .foregroundStyle(.secondary)
+            Text("这个相册还没有照片")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+    }
+}
+
+private struct AlbumDetailErrorCard: View {
+    let message: String
+    let onRetry: () -> Void
+
+    var body: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "exclamationmark.triangle")
+                .font(.system(size: 20, weight: .semibold))
+                .foregroundStyle(Color.orange.opacity(0.85))
+
+            Text("加载失败")
+                .font(.headline)
+                .foregroundStyle(.primary)
+
+            Text(message)
+                .font(.caption)
+                .multilineTextAlignment(.center)
+                .foregroundStyle(.secondary)
+
+            Button("重试", action: onRetry)
+                .buttonStyle(.borderedProminent)
+        }
+        .padding(16)
+        .frame(maxWidth: 360)
+        .background(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(Color(.systemBackground).opacity(0.94))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .stroke(Color.black.opacity(0.08), lineWidth: 1)
+        )
+        .shadow(color: Color.black.opacity(0.08), radius: 10, x: 0, y: 6)
     }
 }
 

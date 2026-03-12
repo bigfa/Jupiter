@@ -519,6 +519,8 @@ private struct SettingsFloatingButton: View {
 private struct AppInfoSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var safariURL: URL? = nil
+    @State private var showPaywall = false
+    @StateObject private var downloadAccessViewModel = DownloadAccessViewModel()
 
     private let privacyURL = URL(string: "https://bigfa.github.io/Jupiter/legal.html")!
     private let termsURL = URL(string: "https://bigfa.github.io/Jupiter/legal.html#terms")!
@@ -526,8 +528,7 @@ private struct AppInfoSheet: View {
 
     private var appVersion: String {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
-        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "—"
-        return "\(version) (\(build))"
+        return version
     }
 
     var body: some View {
@@ -543,6 +544,26 @@ private struct AppInfoSheet: View {
 
                     Link("联系作者", destination: authorEmailURL)
                         .foregroundStyle(.primary)
+
+                    Button {
+                        showPaywall = true
+                    } label: {
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack {
+                                Text("下载权益")
+                                Spacer()
+                                Text(downloadAccessViewModel.isPurchased ? "已解锁" : "未解锁")
+                                    .foregroundStyle(downloadAccessViewModel.isPurchased ? .green : .secondary)
+                                Image(systemName: "chevron.right")
+                                    .font(.caption2)
+                                    .foregroundStyle(.tertiary)
+                            }
+                            Text("一次性购买，永久解锁原图下载")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .foregroundStyle(.primary)
                 }
 
                 Section {
@@ -563,6 +584,12 @@ private struct AppInfoSheet: View {
         .sheet(item: $safariURL) { url in
             SafariView(url: url)
                 .ignoresSafeArea()
+        }
+        .sheet(isPresented: $showPaywall) {
+            DownloadPaywallView(viewModel: downloadAccessViewModel)
+        }
+        .task {
+            await downloadAccessViewModel.prepare()
         }
     }
 }

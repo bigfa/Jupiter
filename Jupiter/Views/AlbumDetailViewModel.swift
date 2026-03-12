@@ -7,6 +7,7 @@ final class AlbumDetailViewModel: ObservableObject {
     @Published private(set) var media: [MediaItem] = []
     @Published private(set) var isLoading = false
     @Published private(set) var errorMessage: String? = nil
+    @Published private(set) var canLoadMore = true
     @Published var requiresPassword = false
 
     private let albumId: String
@@ -28,6 +29,7 @@ final class AlbumDetailViewModel: ObservableObject {
     func loadInitial() async {
         page = 1
         media = []
+        canLoadMore = true
         await loadAlbumDetail()
         await loadMediaPage(1)
     }
@@ -88,6 +90,11 @@ final class AlbumDetailViewModel: ObservableObject {
             }
             page = targetPage
             total = response.total ?? media.count
+            if total > 0 {
+                canLoadMore = media.count < total
+            } else {
+                canLoadMore = !response.media.isEmpty
+            }
         } catch {
             if let apiError = error as? APIError, apiError.statusCode == 403 {
                 requiresPassword = true

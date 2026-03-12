@@ -33,6 +33,7 @@ Jupiter 是一个基于 SwiftUI 的 iOS 照片与相册客户端，支持照片�
 | --- | --- | --- | --- |
 | `baseURL` | 后端 API 根地址 | 是 | `https://w.wpista.com` |
 | `defaultLocale` | 默认语言标识 | 否 | `zh` |
+| `downloadUnlockProductID` | 一次性购买产品 ID（用于下载权益） | 是 | `com.bigfa.jupiter.download.unlock` |
 
 示例：
 
@@ -40,8 +41,11 @@ Jupiter 是一个基于 SwiftUI 的 iOS 照片与相册客户端，支持照片�
 enum AppConfig {
     static let baseURL = URL(string: "https://your-api-domain.com")!
     static let defaultLocale = "zh"
+    static let downloadUnlockProductID = "com.bigfa.jupiter.download.unlock"
 }
 ```
+
+StoreKit 测试流程见：`docs/storekit-testing.md`。
 
 ### 后端 API 依赖
 - `GET /api/media/list`
@@ -128,13 +132,17 @@ File: `Jupiter/Resources/AppConfig.swift`
 | --- | --- | --- | --- |
 | `baseURL` | API server base URL | Yes | `https://w.wpista.com` |
 | `defaultLocale` | Default locale | No | `zh` |
+| `downloadUnlockProductID` | One-time purchase product ID for download entitlement | Yes | `com.bigfa.jupiter.download.unlock` |
 
 ```swift
 enum AppConfig {
     static let baseURL = URL(string: "https://your-api-domain.com")!
     static let defaultLocale = "zh"
+    static let downloadUnlockProductID = "com.bigfa.jupiter.download.unlock"
 }
 ```
+
+StoreKit testing guide: `docs/storekit-testing.md`.
 
 ### Backend API Dependencies
 - `GET /api/media/list`

@@ -1,5 +1,6 @@
 import SwiftUI
 import UIKit
+import Photos
 
 struct MediaZoomPagerView: View {
     let items: [MediaItem]
@@ -381,7 +382,12 @@ private struct MediaMetadataInfoSheet: View {
     let item: MediaItem
 
     @Environment(\.dismiss) private var dismiss
+    @StateObject private var downloadAccessViewModel = DownloadAccessViewModel()
     @State private var contentHeight: CGFloat = 260
+    @State private var showPaywall = false
+    @State private var showMessageAlert = false
+    @State private var messageText = ""
+    @State private var isSaving = false
 
     private var fittedDetentHeight: CGFloat {
         let windowInsets = UIApplication.currentKeyWindowSafeAreaInsets
@@ -390,6 +396,19 @@ private struct MediaMetadataInfoSheet: View {
         let maxHeight = UIScreen.main.bounds.height - max(windowInsets.top, 0) - 20
         let ideal = contentHeight + topBarHeight + windowInsets.bottom
         return min(max(ideal, minHeight), max(minHeight, maxHeight))
+    }
+
+    private var isBusy: Bool {
+        isSaving || downloadAccessViewModel.isProcessing
+    }
+
+    private var downloadURL: URL? {
+        let candidate = item.urlLarge ?? item.urlMedium ?? item.urlThumb ?? item.url
+        guard let url = URL(string: candidate) else { return nil }
+        if url.scheme != nil {
+            return url
+        }
+        return URL(string: url.absoluteString, relativeTo: AppConfig.baseURL)?.absoluteURL
     }
 
     var body: some View {
@@ -409,6 +428,20 @@ private struct MediaMetadataInfoSheet: View {
             }
             .background(Color.white)
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        Task { await handleDownloadTap() }
+                    } label: {
+                        if isBusy {
+                            ProgressView()
+                                .controlSize(.small)
+                        } else {
+                            Label("下载", systemImage: "arrow.down.circle")
+                                .labelStyle(.titleAndIcon)
+                        }
+                    }
+                    .disabled(downloadURL == nil || isBusy)
+                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") {
                         dismiss()
@@ -418,6 +451,9 @@ private struct MediaMetadataInfoSheet: View {
         }
         .presentationDetents([.height(fittedDetentHeight), .large])
         .presentationContentInteraction(.scrolls)
+        .task {
+            await downloadAccessViewModel.prepare()
+        }
         .onPreferenceChange(MetadataContentHeightPreferenceKey.self) { newValue in
             guard newValue > 0 else { return }
             let rounded = ceil(newValue)
@@ -425,6 +461,79 @@ private struct MediaMetadataInfoSheet: View {
                 contentHeight = rounded
             }
         }
+        .sheet(isPresented: $showPaywall) {
+            DownloadPaywallView(viewModel: downloadAccessViewModel) {
+                Task { await saveImageToLibrary() }
+            }
+        }
+        .alert("下载提示", isPresented: $showMessageAlert) {
+            Button("好的", role: .cancel) {}
+        } message: {
+            Text(messageText)
+        }
+    }
+
+    @MainActor
+    private func handleDownloadTap() async {
+        guard downloadURL != nil else {
+            presentMessage("图片地址无效")
+            return
+        }
+        if downloadAccessViewModel.isPurchased {
+            await saveImageToLibrary()
+        } else {
+            showPaywall = true
+        }
+    }
+
+    @MainActor
+    private func saveImageToLibrary() async {
+        guard let url = downloadURL else {
+            presentMessage("图片地址无效")
+            return
+        }
+        isSaving = true
+        defer { isSaving = false }
+
+        let hasPermission = await requestPhotoAccess()
+        guard hasPermission else {
+            presentMessage(String(localized: "Photo library access denied"))
+            return
+        }
+
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            guard let image = UIImage(data: data) else {
+                presentMessage(String(localized: "Failed to save"))
+                return
+            }
+            UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
+            presentMessage(String(localized: "Saved to Photos"))
+        } catch {
+            presentMessage(String(localized: "Download failed"))
+        }
+    }
+
+    private func requestPhotoAccess() async -> Bool {
+        let status = PHPhotoLibrary.authorizationStatus(for: .addOnly)
+        switch status {
+        case .authorized, .limited:
+            return true
+        case .notDetermined:
+            return await withCheckedContinuation { continuation in
+                PHPhotoLibrary.requestAuthorization(for: .addOnly) { newStatus in
+                    continuation.resume(returning: newStatus == .authorized || newStatus == .limited)
+                }
+            }
+        default:
+            return false
+        }
+    }
+
+    @MainActor
+    private func presentMessage(_ text: String) {
+        messageText = text
+        showMessageAlert = true
     }
 }
 
