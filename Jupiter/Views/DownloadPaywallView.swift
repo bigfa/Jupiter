@@ -171,7 +171,7 @@ struct DownloadPaywallView: View {
                             ProgressView()
                                 .tint(.white)
                         } else {
-                            Text(viewModel.isPurchased ? "Purchased" : viewModel.purchaseButtonTitle)
+                            Text(LocalizedStringKey(viewModel.isPurchased ? viewModel.purchasedStatus : viewModel.purchaseButtonTitle))
                                 .font(.headline)
                         }
                     }
@@ -279,8 +279,10 @@ struct MeshBackgroundView: View {
                 .offset(x: animate ? 50 : 150, y: animate ? 200 : -50)
         }
         .onAppear {
-            withAnimation(.easeInOut(duration: 10).repeatForever(autoreverses: true)) {
-                animate.toggle()
+            DispatchQueue.main.async {
+                withAnimation(.easeInOut(duration: 10).repeatForever(autoreverses: true)) {
+                    animate.toggle()
+                }
             }
         }
     }

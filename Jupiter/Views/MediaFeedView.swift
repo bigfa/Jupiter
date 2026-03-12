@@ -127,7 +127,7 @@ struct MediaFeedView: View {
                 .navigationTitle("")
                 .overlay {
                     if viewModel.items.isEmpty && viewModel.errorMessage == nil && !viewModel.isLoading && viewModel.hasAttemptedInitialLoad {
-                        EmptyCategoryPlaceholder(title: viewModel.selectedCategory?.name ?? "All")
+                        EmptyCategoryPlaceholder(title: viewModel.selectedCategory?.name ?? String(localized: "All"))
                             .padding()
                     } else if let message = viewModel.errorMessage, viewModel.items.isEmpty {
                         VStack(spacing: 8) {
@@ -425,7 +425,7 @@ private struct MediaFilterBar: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 20) {
                     CategoryTab(
-                        title: "All",
+                        title: LocalizedStringKey("All"),
                         selected: selectedCategory == nil
                     ) {
                         selectedCategory = nil
@@ -434,7 +434,7 @@ private struct MediaFilterBar: View {
 
                     ForEach(categories) { category in
                         CategoryTab(
-                            title: category.name,
+                            title: LocalizedStringKey(category.name),
                             selected: selectedCategory?.id == category.id
                         ) {
                             selectedCategory = category
@@ -460,7 +460,7 @@ private struct SortFloatingButton: View {
             Image(systemName: "line.3.horizontal.decrease.circle")
             Text(selectedSort.label)
         }
-        .confirmationDialog("Sort", isPresented: $showMenu, titleVisibility: .visible) {
+        .confirmationDialog(Text("Sort"), isPresented: $showMenu, titleVisibility: .visible) {
             ForEach(MediaSortOption.allCases) { option in
                 Button(option.label) {
                     onSelect(option)
@@ -471,7 +471,7 @@ private struct SortFloatingButton: View {
 }
 
 private struct CategoryTab: View {
-    let title: String
+    let title: LocalizedStringKey
     let selected: Bool
     let action: () -> Void
 

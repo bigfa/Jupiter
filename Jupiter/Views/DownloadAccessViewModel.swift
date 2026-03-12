@@ -44,6 +44,10 @@ final class DownloadAccessViewModel: ObservableObject {
         return "One-time purchase"
     }
 
+    var purchasedStatus: String {
+        return "Purchased"
+    }
+
     func prepare() async {
         guard !isLoading else { return }
         isLoading = true
