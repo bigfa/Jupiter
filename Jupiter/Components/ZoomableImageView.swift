@@ -56,6 +56,10 @@ struct ZoomableImageView: UIViewRepresentable {
 
     func updateUIView(_ uiView: UIScrollView, context: Context) {
         guard let imageView = context.coordinator.imageView else { return }
+        if #available(iOS 17.0, *) {
+            let isProUnlocked = UserDefaults.standard.bool(forKey: AppConfig.proEntitlementCacheKey)
+            imageView.preferredImageDynamicRange = isProUnlocked ? .high : .standard
+        }
         if context.coordinator.currentURL != url {
             context.coordinator.currentURL = url
             uiView.setZoomScale(1, animated: false)

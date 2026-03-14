@@ -1,13 +1,22 @@
 import Foundation
 
 struct AlbumService {
-    func fetchAlbums(page: Int, pageSize: Int, category: String? = nil) async throws -> AlbumListResponse {
+    func fetchAlbums(
+        page: Int,
+        pageSize: Int,
+        category: String? = nil,
+        cacheBust: Bool = false
+    ) async throws -> AlbumListResponse {
         var query: [URLQueryItem] = [
             .init(name: "page", value: String(page)),
             .init(name: "pageSize", value: String(pageSize))
         ]
         if let category, !category.isEmpty {
             query.append(.init(name: "category", value: category))
+        }
+        if cacheBust {
+            let stamp = String(Int(Date().timeIntervalSince1970 * 1000))
+            query.append(.init(name: "_t", value: stamp))
         }
         return try await APIClient.shared.get(path: "/api/albums", query: query)
     }

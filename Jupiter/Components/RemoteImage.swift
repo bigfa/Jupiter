@@ -10,6 +10,7 @@ struct RemoteImage: View {
     var onImage: ((UIImage) -> Void)? = nil
     var showsProgress: Bool = true
     var disableAnimations: Bool = false
+    @AppStorage(AppConfig.proEntitlementCacheKey) private var isProUnlocked = false
 
     var body: some View {
         let base = KFImage(url)
@@ -46,6 +47,7 @@ struct RemoteImage: View {
                         transaction.animation = nil
                     }
                 }
+                .proHDR(isProUnlocked)
         } else {
             base
                 .onSuccess { result in
@@ -60,6 +62,22 @@ struct RemoteImage: View {
                         transaction.animation = nil
                     }
                 }
+                .proHDR(isProUnlocked)
+        }
+    }
+}
+
+private extension View {
+    @ViewBuilder
+    func proHDR(_ enabled: Bool) -> some View {
+        if enabled {
+            if #available(iOS 17.0, *) {
+                self.allowedDynamicRange(.high)
+            } else {
+                self
+            }
+        } else {
+            self
         }
     }
 }

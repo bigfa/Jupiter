@@ -10,6 +10,7 @@ struct AlbumDetailView: View {
     @State private var showUnlock = false
     @State private var selectedMediaForFullscreen: MediaItem? = nil
     @State private var animatedItemIds: Set<String> = []
+    private let gridHorizontalPadding: CGFloat = 12
     private let spacing: CGFloat = 6
 
     init(albumId: String, preview: AlbumListItem? = nil) {
@@ -24,7 +25,7 @@ struct AlbumDetailView: View {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 14) {
                     headerSection
-                        .padding(.horizontal, 12)
+                        .padding(.horizontal, gridHorizontalPadding)
                         .padding(.top, 12)
 
                     if viewModel.media.isEmpty && viewModel.isLoading {
@@ -33,15 +34,16 @@ struct AlbumDetailView: View {
                             columnCount: columnCount(for: proxy.size.width),
                             spacing: spacing
                         )
-                        .padding(.horizontal, 12)
+                        .padding(.horizontal, gridHorizontalPadding)
                     } else if !viewModel.media.isEmpty {
                         let itemIndexMap = Dictionary(
                             uniqueKeysWithValues: viewModel.media.enumerated().map { ($1.id, $0) }
                         )
+                        let gridWidth = max(proxy.size.width - gridHorizontalPadding * 2, 0)
 
                         MasonryGrid(
                             items: viewModel.media,
-                            width: proxy.size.width,
+                            width: gridWidth,
                             columnCount: viewModel.media.count == 1 ? 1 : columnCount(for: proxy.size.width),
                             spacing: spacing
                         ) { item in
@@ -63,14 +65,15 @@ struct AlbumDetailView: View {
                             }
                             .buttonStyle(.plain)
                         }
-                        .frame(width: proxy.size.width, alignment: .leading)
+                        .frame(width: gridWidth, alignment: .leading)
+                        .padding(.horizontal, gridHorizontalPadding)
 
                         if viewModel.isLoading && viewModel.canLoadMore {
                             AlbumDetailLoadMoreSkeleton(
                                 columnCount: columnCount(for: proxy.size.width),
                                 spacing: spacing
                             )
-                            .padding(.horizontal, 12)
+                            .padding(.horizontal, gridHorizontalPadding)
                             .padding(.top, 2)
                         } else if !viewModel.canLoadMore {
                             Text("没有更多了")
@@ -165,38 +168,41 @@ struct AlbumDetailView: View {
 
     @ViewBuilder
     private var headerSection: some View {
-        if let description = viewModel.album?.description ?? preview?.description, !description.isEmpty {
-            VStack(alignment: .leading, spacing: 10) {
-                Text("“")
-                    .font(.system(size: 34, weight: .bold, design: .serif))
-                    .foregroundStyle(Color.black.opacity(0.26))
-                    .frame(maxWidth: .infinity, alignment: .leading)
+        let raw = viewModel.album?.description ?? preview?.description ?? ""
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        let isPlaceholder = trimmed.isEmpty
+        let displayText = isPlaceholder ? "这本影集还没有描述，先看看这组照片吧。" : trimmed
 
-                Text(description)
-                    .font(.system(size: 17, weight: .medium, design: .serif))
-                    .lineSpacing(4)
-                    .foregroundStyle(Color.black.opacity(0.72))
-            }
-            .padding(16)
-            .background(
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                Color.white.opacity(0.96),
-                                Color(.systemGray6).opacity(0.72)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .stroke(Color.black.opacity(0.07), lineWidth: 1)
-            )
-            .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 8)
+        VStack(alignment: .leading, spacing: 10) {
+            Text("“")
+                .font(.system(size: 34, weight: .bold, design: .serif))
+                .foregroundStyle(Color.black.opacity(isPlaceholder ? 0.2 : 0.26))
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            Text(displayText)
+                .font(.system(size: 17, weight: .medium, design: .serif))
+                .lineSpacing(4)
+                .foregroundStyle(Color.black.opacity(isPlaceholder ? 0.48 : 0.72))
         }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color.white.opacity(0.96),
+                            Color(.systemGray6).opacity(0.72)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .stroke(Color.black.opacity(0.07), lineWidth: 1)
+        )
+        .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 8)
     }
 
     private func columnCount(for width: CGFloat) -> Int {
@@ -208,6 +214,7 @@ struct AlbumDetailView: View {
     @ViewBuilder
     private func thumbnailView(for item: MediaItem) -> some View {
         let card = MediaMasonryCard(item: item)
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
         if #available(iOS 18, *) {
             card.matchedTransitionSource(id: item.id, in: heroNamespace)
         } else {

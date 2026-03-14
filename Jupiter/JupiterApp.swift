@@ -9,9 +9,14 @@ import SwiftUI
 
 @main
 struct JupiterApp: App {
+    @StateObject private var proAccessViewModel = DownloadAccessViewModel()
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .task {
+                    await proAccessViewModel.prepare()
+                }
         }
     }
 }

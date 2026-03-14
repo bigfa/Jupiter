@@ -25,9 +25,11 @@ final class DownloadAccessViewModel: ObservableObject {
     private let productId: String
     private var product: Product? = nil
     private var updatesTask: Task<Void, Never>? = nil
+    private let defaults = UserDefaults.standard
 
     init(productId: String? = nil) {
         self.productId = productId ?? AppConfig.downloadUnlockProductID
+        self.isPurchased = defaults.bool(forKey: AppConfig.proEntitlementCacheKey)
         updatesTask = Task { [weak self] in
             await self?.observeTransactionUpdates()
         }
@@ -128,6 +130,7 @@ final class DownloadAccessViewModel: ObservableObject {
             }
         }
         isPurchased = hasEntitlement
+        defaults.set(hasEntitlement, forKey: AppConfig.proEntitlementCacheKey)
     }
 
     private func observeTransactionUpdates() async {

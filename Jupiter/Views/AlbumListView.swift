@@ -25,13 +25,17 @@ struct AlbumListView: View {
                     } else {
                         LazyVGrid(columns: columns, spacing: cardSpacing) {
                             ForEach(viewModel.albums) { album in
-                                NavigationLink(value: album) {
+                                NavigationLink {
+                                    AlbumDetailView(albumId: album.id, preview: album)
+                                } label: {
                                     AlbumCard(album: album)
+                                        .contentShape(Rectangle())
                                         .task {
                                             await viewModel.loadMoreIfNeeded(current: album)
                                         }
                                 }
                                 .buttonStyle(.plain)
+                                .id(album.id)
                             }
                         }
                         .padding(.horizontal, horizontalPadding)
@@ -52,7 +56,7 @@ struct AlbumListView: View {
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .refreshable {
-                await viewModel.loadInitial()
+                await viewModel.refresh()
             }
             .safeAreaInset(edge: .top) {
                 AlbumCategoryBar(
@@ -95,9 +99,6 @@ struct AlbumListView: View {
                 if viewModel.albums.isEmpty {
                     await viewModel.loadInitial()
                 }
-            }
-            .navigationDestination(for: AlbumListItem.self) { album in
-                AlbumDetailView(albumId: album.id, preview: album)
             }
         }
     }

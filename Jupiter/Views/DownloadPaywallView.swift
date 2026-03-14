@@ -105,6 +105,7 @@ struct DownloadPaywallView: View {
     private var featuresList: some View {
         VStack(alignment: .leading, spacing: 20) {
             featureRow(icon: "photo.badge.arrow.down.fill", title: "Original Quality", subtitle: "Download photos in their highest resolution")
+            featureRow(icon: "sparkles", title: "HDR Display", subtitle: "Pro users can view HDR photos with enhanced highlights")
             featureRow(icon: "clock.arrow.2.circlepath", title: "Lifetime Access", subtitle: "One-time purchase, no recurring fees")
             featureRow(icon: "iphone.radiowaves.left.and.right", title: "Sync Everywhere", subtitle: "Automatically sync status across all devices")
         }
@@ -287,4 +288,3 @@ struct MeshBackgroundView: View {
         }
     }
 }
-
