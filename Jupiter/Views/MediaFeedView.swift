@@ -121,7 +121,7 @@ struct MediaFeedView: View {
                         .padding(.horizontal, spacing)
                         .padding(.top, spacing)
                         .padding(.bottom, 8)
-                        .background(Color(.systemBackground))
+                        .background(CinematicToolbarBackground())
                     }
                 }
                 .navigationTitle("")
@@ -477,10 +477,11 @@ private struct CategoryTab: View {
 
     var body: some View {
         Button(action: action) {
+            let style = CinematicSurfaceStyle.tab(selected: selected)
             Text(title)
                 .font(.system(size: 28, weight: selected ? .bold : .regular, design: .serif))
                 .tracking(0.3)
-                .foregroundStyle(selected ? Color.black : Color.gray.opacity(0.45))
+                .foregroundStyle(CinematicPalette.chromeText.opacity(style.foregroundOpacity))
         }
         .buttonStyle(.plain)
     }

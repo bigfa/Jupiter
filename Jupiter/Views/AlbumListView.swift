@@ -68,7 +68,7 @@ struct AlbumListView: View {
                 .padding(.horizontal, horizontalPadding)
                 .padding(.top, 12)
                 .padding(.bottom, 8)
-                .background(Color(.systemBackground))
+                .background(CinematicToolbarBackground())
             }
             .safeAreaInset(edge: .bottom) {
                 HStack {
@@ -142,11 +142,13 @@ private struct CategoryTab: View {
 
     var body: some View {
         Button(action: action) {
+            let style = CinematicSurfaceStyle.tab(selected: selected)
             Text(title)
                 .font(.system(size: 28, weight: selected ? .bold : .regular, design: .serif))
                 .tracking(0.3)
-                .foregroundStyle(selected ? Color.black : Color.gray.opacity(0.45))
+                .foregroundStyle(CinematicPalette.chromeText.opacity(style.foregroundOpacity))
         }
+        .buttonStyle(.plain)
     }
 }
 
