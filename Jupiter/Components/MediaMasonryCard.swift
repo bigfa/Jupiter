@@ -1,8 +1,15 @@
 import SwiftUI
 import UIKit
 
+enum MediaMasonryCardStyle {
+    case plain
+    case editorial
+}
+
 struct MediaMasonryCard: View {
     let item: MediaItem
+    var style: MediaMasonryCardStyle = .plain
+    var showsLikesBadge = true
     var heroNamespace: Namespace.ID? = nil
     var isHero: Bool = false
     var onImageLoaded: ((UIImage) -> Void)? = nil
@@ -31,14 +38,67 @@ struct MediaMasonryCard: View {
             }
         )
             .frame(maxWidth: .infinity)
-            .background(Color(.secondarySystemBackground))
+            .background(CinematicPalette.warmCanvas)
             .clipped()
 
-        if let heroNamespace, isHero {
-            image.matchedGeometryEffect(id: item.id, in: heroNamespace, isSource: true)
-        } else {
-            image
+        let content = Group {
+            switch style {
+            case .plain:
+                image
+            case .editorial:
+                editorialCard(image: image)
+            }
         }
+
+        if let heroNamespace, isHero {
+            content.matchedGeometryEffect(id: item.id, in: heroNamespace, isSource: true)
+        } else {
+            content
+        }
+    }
+
+    private func editorialCard<Content: View>(image: Content) -> some View {
+        ZStack(alignment: .topTrailing) {
+            image
+                .overlay {
+                    LinearGradient(
+                        colors: [
+                            Color.white.opacity(0.22),
+                            Color.clear,
+                            Color.black.opacity(0.10)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                }
+
+            if showsLikesBadge, let likes = item.likes, likes > 0 {
+                HStack(spacing: 5) {
+                    Image(systemName: "heart.fill")
+                        .font(.caption2.weight(.semibold))
+                    Text("\(likes)")
+                        .font(.caption.weight(.semibold))
+                }
+                .foregroundStyle(Color.black.opacity(0.64))
+                .padding(.horizontal, 9)
+                .padding(.vertical, 7)
+                .background(
+                    Capsule(style: .continuous)
+                        .fill(CinematicPalette.warmSurface.opacity(0.88))
+                )
+                .overlay(
+                    Capsule(style: .continuous)
+                        .stroke(Color.black.opacity(0.05), lineWidth: 1)
+                )
+                .padding(10)
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .stroke(Color.black.opacity(0.05), lineWidth: 1)
+        )
+        .shadow(color: Color.black.opacity(0.07), radius: 14, x: 0, y: 8)
     }
 }
 

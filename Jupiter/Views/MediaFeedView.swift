@@ -9,6 +9,8 @@ struct MediaFeedView: View {
     @State private var showAppInfo = false
 
     private let spacing: CGFloat = 6
+    private let horizontalPadding: CGFloat = 12
+    private let topOverlayHeight: CGFloat = 72
 
     init(rootSelection: Binding<RootSection> = .constant(.home)) {
         _rootSelection = rootSelection
@@ -16,29 +18,41 @@ struct MediaFeedView: View {
 
     var body: some View {
         ZStack {
+            MediaFeedBackground()
+                .ignoresSafeArea()
+
             NavigationStack {
                 GeometryReader { proxy in
                     let columnCountValue = columnCount(for: proxy.size.width)
                     let isHeatSorted = viewModel.selectedSort == .likes
+                    let contentWidth = proxy.size.width - horizontalPadding * 2
 
                     ScrollViewReader { scrollProxy in
                         ScrollView {
-                            LazyVStack(spacing: 12) {
+                            LazyVStack(spacing: 16) {
                                 Color.clear
-                                    .frame(height: 0)
+                                    .frame(height: topOverlayHeight)
                                     .id("top")
 
                                 if viewModel.items.isEmpty && viewModel.isLoading {
                                     MediaFeedSkeletonView(
                                         spacing: spacing,
                                         columnCount: columnCountValue,
-                                        horizontalPadding: spacing
+                                        horizontalPadding: horizontalPadding
                                     )
                                 } else {
                                     if isHeatSorted {
+                                        MediaSectionHeader(
+                                            content: MediaFeedPresentation.heatSectionHeader(
+                                                itemCount: viewModel.items.count
+                                            )
+                                        )
+                                        .padding(.horizontal, horizontalPadding)
+                                        .padding(.top, 6)
+
                                         MasonryGrid(
                                             items: viewModel.items,
-                                            width: proxy.size.width,
+                                            width: contentWidth,
                                             columnCount: viewModel.items.count == 1 ? 1 : columnCountValue,
                                             spacing: spacing
                                         ) { item in
@@ -52,20 +66,21 @@ struct MediaFeedView: View {
                                             }
                                             .buttonStyle(.plain)
                                         }
-                                        .frame(width: proxy.size.width, alignment: .leading)
+                                        .frame(width: contentWidth, alignment: .leading)
+                                        .padding(.horizontal, horizontalPadding)
                                     } else {
                                         ForEach(buildSections(from: viewModel.items)) { section in
-                                            VStack(alignment: .leading, spacing: 8) {
-                                                Text(section.title)
-                                                    .font(.system(size: 20, weight: .bold, design: .serif))
-                                                    .tracking(0.3)
-                                                    .foregroundStyle(Color.black)
-                                                    .padding(.top, 8)
-                                                    .padding(.horizontal, spacing)
+                                            VStack(alignment: .leading, spacing: 12) {
+                                                MediaSectionHeader(
+                                                    content: MediaFeedPresentation.dateSectionHeader(
+                                                        title: section.title,
+                                                        itemCount: section.items.count
+                                                    )
+                                                )
 
                                                 MasonryGrid(
                                                     items: section.items,
-                                                    width: proxy.size.width,
+                                                    width: contentWidth,
                                                     columnCount: section.items.count == 1 ? 1 : columnCountValue,
                                                     spacing: spacing
                                                 ) { item in
@@ -79,21 +94,22 @@ struct MediaFeedView: View {
                                                     }
                                                     .buttonStyle(.plain)
                                                 }
-                                                .frame(width: proxy.size.width, alignment: .leading)
+                                                .frame(width: contentWidth, alignment: .leading)
                                             }
+                                            .padding(.horizontal, horizontalPadding)
                                         }
                                     }
 
                                     if viewModel.isLoading {
                                         MediaLoadMoreSkeleton(
                                             spacing: spacing,
-                                            columnCount: columnCountValue
+                                            columnCount: columnCountValue,
+                                            horizontalPadding: horizontalPadding
                                         )
-                                        .frame(width: proxy.size.width, alignment: .leading)
                                     } else if !viewModel.items.isEmpty && !viewModel.canLoadMore {
-                                        Text("No more")
+                                        Text(MediaFeedPresentation.noMoreLabel(sort: viewModel.selectedSort))
                                             .font(.caption)
-                                            .foregroundStyle(.secondary)
+                                            .foregroundStyle(Color.black.opacity(0.42))
                                             .frame(maxWidth: .infinity)
                                             .padding(.vertical, 12)
                                     }
@@ -110,40 +126,43 @@ struct MediaFeedView: View {
                             scrollProxy.scrollTo("top", anchor: .top)
                         }
                     }
-                    .safeAreaInset(edge: .top) {
-                        MediaFilterBar(
-                            categories: viewModel.categories,
-                            selectedCategory: $viewModel.selectedCategory,
-                            selectedSort: $viewModel.selectedSort
-                        ) {
-                            Task { await viewModel.applyFilters() }
-                        }
-                        .padding(.horizontal, spacing)
-                        .padding(.top, spacing)
-                        .padding(.bottom, 8)
-                        .background(CinematicToolbarBackground())
-                    }
                 }
                 .navigationTitle("")
+                .toolbarBackground(.hidden, for: .navigationBar)
                 .overlay {
                     if viewModel.items.isEmpty && viewModel.errorMessage == nil && !viewModel.isLoading && viewModel.hasAttemptedInitialLoad {
-                        EmptyCategoryPlaceholder(title: viewModel.selectedCategory?.name ?? String(localized: "All"))
-                            .padding()
-                    } else if let message = viewModel.errorMessage, viewModel.items.isEmpty {
-                        VStack(spacing: 8) {
-                            Text("Failed to load")
-                                .font(.headline)
-                            Text(message)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                            Button("Retry") {
-                                Task { await viewModel.loadInitial() }
-                            }
+                        let content = MediaFeedPresentation.emptyState(categoryName: viewModel.selectedCategory?.name)
+                        MediaFeedStateCard(
+                            title: content.title,
+                            summary: content.summary,
+                            actionTitle: "刷新看看"
+                        ) {
+                            Task { await viewModel.refresh() }
                         }
-                        .padding()
+                        .padding(.horizontal, 24)
+                    } else if let message = viewModel.errorMessage, viewModel.items.isEmpty {
+                        MediaFeedStateCard(
+                            title: "照片加载失败",
+                            summary: message,
+                            actionTitle: "重新加载"
+                        ) {
+                            Task { await viewModel.loadInitial() }
+                        }
+                        .padding(.horizontal, 24)
                     }
                 }
-                .safeAreaInset(edge: .bottom) {
+                .overlay(alignment: .top) {
+                    MediaFilterBar(
+                        categories: viewModel.categories,
+                        selectedCategory: $viewModel.selectedCategory,
+                        selectedSort: $viewModel.selectedSort
+                    ) {
+                        Task { await viewModel.applyFilters() }
+                    }
+                    .padding(.horizontal, horizontalPadding)
+                    .padding(.top, spacing)
+                }
+                .safeAreaInset(edge: .bottom, spacing: 0) {
                     ZStack {
                         FloatingTabSwitcher(selection: $rootSelection)
 
@@ -161,6 +180,7 @@ struct MediaFeedView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.horizontal, 16)
+                    .padding(.top, 8)
                     .padding(.bottom, 12)
                 }
                 .task {
@@ -272,7 +292,11 @@ struct MediaFeedView: View {
 
     @ViewBuilder
     private func thumbnailView(for item: MediaItem) -> some View {
-        let card = MediaMasonryCard(item: item)
+        let card = MediaMasonryCard(
+            item: item,
+            style: .editorial,
+            showsLikesBadge: viewModel.selectedSort != .likes
+        )
         if #available(iOS 18, *) {
             card.matchedTransitionSource(id: item.id, in: heroNamespace)
         } else {
@@ -285,6 +309,123 @@ private struct MediaDaySection: Identifiable {
     let id: String
     let title: String
     let items: [MediaItem]
+}
+
+private struct MediaFeedBackground: View {
+    @State private var animate = false
+
+    var body: some View {
+        ZStack {
+            LinearGradient(
+                colors: [
+                    CinematicPalette.warmCanvas,
+                    Color(red: 0.989, green: 0.979, blue: 0.964),
+                    Color.white
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+
+            Circle()
+                .fill(Color(red: 0.91, green: 0.67, blue: 0.50).opacity(0.14))
+                .frame(width: 250, height: 250)
+                .blur(radius: 34)
+                .offset(x: animate ? 120 : 84, y: animate ? -220 : -180)
+
+            Circle()
+                .fill(Color(red: 0.86, green: 0.43, blue: 0.38).opacity(0.08))
+                .frame(width: 220, height: 220)
+                .blur(radius: 44)
+                .offset(x: animate ? -96 : -58, y: animate ? 250 : 190)
+        }
+        .onAppear {
+            withAnimation(.easeInOut(duration: 7).repeatForever(autoreverses: true)) {
+                animate.toggle()
+            }
+        }
+    }
+}
+
+private struct MediaSectionHeader: View {
+    let content: MediaFeedSectionHeaderContent
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if !content.eyebrow.isEmpty || !content.caption.isEmpty {
+                HStack(alignment: .firstTextBaseline, spacing: 12) {
+                    if !content.eyebrow.isEmpty {
+                        Text(content.eyebrow)
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(Color.black.opacity(0.44))
+                            .tracking(0.6)
+                    }
+
+                    Spacer(minLength: 0)
+
+                    if !content.caption.isEmpty {
+                        Text(content.caption)
+                            .font(.caption)
+                            .foregroundStyle(Color.black.opacity(0.46))
+                    }
+                }
+            }
+
+            Text(content.title)
+                .font(.system(size: 26, weight: .bold, design: .serif))
+                .foregroundStyle(Color.black.opacity(0.86))
+
+            Rectangle()
+                .fill(Color.black.opacity(0.06))
+                .frame(width: 72, height: 1)
+        }
+    }
+}
+
+private struct MediaFeedStateCard: View {
+    let title: String
+    let summary: String
+    let actionTitle: String?
+    let action: (() -> Void)?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text(title)
+                .font(.system(size: 28, weight: .bold, design: .serif))
+                .foregroundStyle(Color.black.opacity(0.86))
+
+            Text(summary)
+                .font(.subheadline)
+                .foregroundStyle(Color.black.opacity(0.58))
+                .lineSpacing(4)
+
+            if let actionTitle, let action {
+                Button(actionTitle, action: action)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Color.black.opacity(0.7))
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                    .background(
+                        Capsule(style: .continuous)
+                            .fill(CinematicPalette.warmCanvas)
+                    )
+                    .overlay(
+                        Capsule(style: .continuous)
+                            .stroke(Color.black.opacity(0.05), lineWidth: 1)
+                    )
+            }
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .fill(CinematicPalette.warmSurface.opacity(0.94))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .stroke(Color.black.opacity(0.05), lineWidth: 1)
+        )
+        .shadow(color: Color.black.opacity(0.08), radius: 18, x: 0, y: 8)
+    }
 }
 
 private struct MediaFeedSkeletonView: View {
@@ -312,6 +453,7 @@ private struct MediaFeedSkeletonView: View {
 private struct MediaLoadMoreSkeleton: View {
     let spacing: CGFloat
     let columnCount: Int
+    let horizontalPadding: CGFloat
 
     var body: some View {
         SkeletonMasonryGrid(
@@ -319,6 +461,7 @@ private struct MediaLoadMoreSkeleton: View {
             spacing: spacing,
             heights: [140, 200, 160, 180]
         )
+        .padding(.horizontal, horizontalPadding)
         .padding(.bottom, 12)
     }
 }
@@ -365,7 +508,8 @@ private struct SkeletonBlock: View {
         GeometryReader { geo in
             let width = geo.size.width
             ZStack {
-                Color(.systemGray5)
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(CinematicPalette.warmSurface.opacity(0.82))
                 LinearGradient(
                     gradient: Gradient(colors: [Color.clear, Color.white.opacity(0.35), Color.clear]),
                     startPoint: .top,
@@ -376,6 +520,11 @@ private struct SkeletonBlock: View {
             }
         }
         .frame(height: height)
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .stroke(Color.black.opacity(0.04), lineWidth: 1)
+        )
         .clipped()
         .onAppear {
             withAnimation(.linear(duration: 1.2).repeatForever(autoreverses: false)) {
@@ -394,7 +543,8 @@ private struct SkeletonLine: View {
         GeometryReader { geo in
             let actualWidth = min(width, geo.size.width)
             ZStack {
-                Color(.systemGray5)
+                Capsule(style: .continuous)
+                    .fill(CinematicPalette.warmSurface.opacity(0.82))
                 LinearGradient(
                     gradient: Gradient(colors: [Color.clear, Color.white.opacity(0.35), Color.clear]),
                     startPoint: .top,
@@ -405,6 +555,7 @@ private struct SkeletonLine: View {
             }
         }
         .frame(width: width, height: height)
+        .clipShape(Capsule(style: .continuous))
         .clipped()
         .onAppear {
             withAnimation(.linear(duration: 1.2).repeatForever(autoreverses: false)) {
@@ -423,9 +574,9 @@ private struct MediaFilterBar: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 20) {
+                HStack(spacing: 10) {
                     CategoryTab(
-                        title: LocalizedStringKey("All"),
+                        title: MediaFeedPresentation.allCategoryTabTitle,
                         selected: selectedCategory == nil
                     ) {
                         selectedCategory = nil
@@ -434,7 +585,7 @@ private struct MediaFilterBar: View {
 
                     ForEach(categories) { category in
                         CategoryTab(
-                            title: LocalizedStringKey(category.name),
+                            title: category.name,
                             selected: selectedCategory?.id == category.id
                         ) {
                             selectedCategory = category
@@ -442,7 +593,7 @@ private struct MediaFilterBar: View {
                         }
                     }
                 }
-                .padding(.vertical, 8)
+                .padding(.vertical, 6)
             }
 
         }
@@ -471,7 +622,7 @@ private struct SortFloatingButton: View {
 }
 
 private struct CategoryTab: View {
-    let title: LocalizedStringKey
+    let title: String
     let selected: Bool
     let action: () -> Void
 
@@ -479,27 +630,30 @@ private struct CategoryTab: View {
         Button(action: action) {
             let style = CinematicSurfaceStyle.tab(selected: selected)
             Text(title)
-                .font(.system(size: 28, weight: selected ? .bold : .regular, design: .serif))
-                .tracking(0.3)
+                .font(.system(size: 18, weight: selected ? .semibold : .medium, design: .serif))
+                .tracking(0.2)
                 .foregroundStyle(CinematicPalette.chromeText.opacity(style.foregroundOpacity))
+                .padding(.horizontal, style.horizontalPadding)
+                .padding(.vertical, style.verticalPadding)
+                .background(
+                    Capsule(style: .continuous)
+                        .fill(CinematicPalette.warmSurface.opacity(style.fillOpacity))
+                )
+                .overlay(
+                    Capsule(style: .continuous)
+                        .stroke(
+                            CinematicPalette.chromeStroke.opacity(style.strokeOpacity),
+                            lineWidth: 1
+                        )
+                )
+                .shadow(
+                    color: CinematicPalette.chromeShadow.opacity(style.shadowOpacity),
+                    radius: style.shadowRadius,
+                    x: 0,
+                    y: selected ? 6 : 0
+                )
         }
         .buttonStyle(.plain)
-    }
-}
-
-private struct EmptyCategoryPlaceholder: View {
-    let title: String
-
-    var body: some View {
-        VStack(spacing: 10) {
-            Image(systemName: "photo.on.rectangle.angled")
-                .font(.system(size: 28))
-                .foregroundStyle(.secondary)
-            Text("No photos in \(title)")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
