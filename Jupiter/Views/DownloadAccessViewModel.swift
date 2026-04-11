@@ -15,6 +15,24 @@ enum DownloadRestoreResult: Equatable {
     case failed(String)
 }
 
+enum DownloadEntitlementPresentation {
+    static func purchaseButtonTitle(priceText: String?) -> String {
+        guard let priceText else {
+            return String(localized: "One-time purchase")
+        }
+
+        return String(
+            format: String(localized: "One-time purchase (%@)"),
+            locale: Locale.current,
+            priceText
+        )
+    }
+
+    static func benefitStatusText(isPurchased: Bool) -> String {
+        String(localized: isPurchased ? "Unlocked" : "Locked")
+    }
+}
+
 @MainActor
 final class DownloadAccessViewModel: ObservableObject {
     @Published private(set) var isPurchased = false
@@ -40,14 +58,11 @@ final class DownloadAccessViewModel: ObservableObject {
     }
 
     var purchaseButtonTitle: String {
-        if let priceText {
-            return "One-time purchase (\(priceText))"
-        }
-        return "One-time purchase"
+        DownloadEntitlementPresentation.purchaseButtonTitle(priceText: priceText)
     }
 
     var purchasedStatus: String {
-        return "Purchased"
+        DownloadEntitlementPresentation.benefitStatusText(isPurchased: isPurchased)
     }
 
     func prepare() async {

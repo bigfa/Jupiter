@@ -517,10 +517,90 @@ private struct SettingsFloatingButton: View {
     }
 }
 
+struct AppInfoHeroContent: Equatable {
+    let eyebrow: String
+    let title: String
+    let summary: String
+    let versionLabel: String
+    let highlights: [String]
+}
+
+struct AppInfoAccessCardContent: Equatable {
+    let title: String
+    let status: String
+    let summary: String
+    let actionTitle: String
+    let isUnlocked: Bool
+}
+
+struct AppInfoPrimaryCardContent: Identifiable, Equatable {
+    let id: String
+    let title: String
+    let subtitle: String
+    let systemImage: String
+}
+
+enum AppInfoPresentation {
+    static func hero(version: String) -> AppInfoHeroContent {
+        AppInfoHeroContent(
+            eyebrow: "关于产品",
+            title: "Tinyglim",
+            summary: "把照片、相册和下载权益收在一张更安静、更轻盈的画布里。",
+            versionLabel: "版本 \(version)",
+            highlights: ["照片浏览", "相册整理", "原图下载"]
+        )
+    }
+
+    static func accessCard(isPurchased: Bool) -> AppInfoAccessCardContent {
+        if isPurchased {
+            return AppInfoAccessCardContent(
+                title: "下载权益",
+                status: "已解锁",
+                summary: "原图下载与 HDR 照片显示已可用，可直接进入查看权益详情。",
+                actionTitle: "查看详情",
+                isUnlocked: true
+            )
+        }
+
+        return AppInfoAccessCardContent(
+            title: "下载权益",
+            status: "未解锁",
+            summary: "一次购买后即可永久下载原图，并解锁 HDR 照片显示。",
+            actionTitle: "查看权益",
+            isUnlocked: false
+        )
+    }
+
+    static func primaryCards() -> [AppInfoPrimaryCardContent] {
+        [
+            AppInfoPrimaryCardContent(
+                id: "contact",
+                title: "联系作者",
+                subtitle: "反馈问题、合作沟通，或者只是打个招呼。",
+                systemImage: "envelope.badge"
+            ),
+            AppInfoPrimaryCardContent(
+                id: "privacy",
+                title: "隐私政策",
+                subtitle: "查看应用如何处理数据与下载权益相关信息。",
+                systemImage: "hand.raised"
+            ),
+            AppInfoPrimaryCardContent(
+                id: "terms",
+                title: "服务条款",
+                subtitle: "查看服务说明、购买与使用相关约定。",
+                systemImage: "doc.text"
+            )
+        ]
+    }
+}
+
 private struct AppInfoSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
     @State private var safariURL: URL? = nil
     @State private var showPaywall = false
+    @State private var animateSections = false
     @StateObject private var downloadAccessViewModel = DownloadAccessViewModel()
 
     private let privacyURL = URL(string: "https://tinyglim.wpista.com/legal.html")!
@@ -532,53 +612,53 @@ private struct AppInfoSheet: View {
         return version
     }
 
+    private var heroContent: AppInfoHeroContent {
+        AppInfoPresentation.hero(version: appVersion)
+    }
+
+    private var accessContent: AppInfoAccessCardContent {
+        AppInfoPresentation.accessCard(isPurchased: downloadAccessViewModel.isPurchased)
+    }
+
+    private var primaryCards: [AppInfoPrimaryCardContent] {
+        AppInfoPresentation.primaryCards()
+    }
+
     var body: some View {
         NavigationStack {
-            List {
-                Section {
-                    HStack {
-                        Text("Version")
-                        Spacer()
-                        Text(appVersion)
-                            .foregroundStyle(.secondary)
+            ZStack {
+                AppInfoBackground()
+                    .ignoresSafeArea()
+
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 18) {
+                        heroSection
+                            .opacity(animateSections ? 1 : 0)
+                            .offset(y: animateSections ? 0 : 14)
+
+                        accessSection
+                            .opacity(animateSections ? 1 : 0)
+                            .offset(y: animateSections ? 0 : 18)
+
+                        actionsSection
+                            .opacity(animateSections ? 1 : 0)
+                            .offset(y: animateSections ? 0 : 22)
+
+                        footerSection
+                            .opacity(animateSections ? 1 : 0)
+                            .offset(y: animateSections ? 0 : 26)
                     }
-
-                    Link("Contact Author", destination: authorEmailURL)
-                        .foregroundStyle(.primary)
-
-                    Button {
-                        showPaywall = true
-                    } label: {
-                        VStack(alignment: .leading, spacing: 2) {
-                            HStack {
-                                Text("Download Benefits")
-                                Spacer()
-                                Text(downloadAccessViewModel.isPurchased ? "Unlocked" : "Locked")
-                                    .foregroundStyle(downloadAccessViewModel.isPurchased ? .green : .secondary)
-                                Image(systemName: "chevron.right")
-                                    .font(.caption2)
-                                    .foregroundStyle(.tertiary)
-                            }
-                            Text("One-time purchase, permanently unlock original image downloads")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .foregroundStyle(.primary)
-                }
-
-                Section {
-                    Button("Privacy Policy") { safariURL = privacyURL }
-                        .foregroundStyle(.primary)
-                    Button("Terms of Service") { safariURL = termsURL }
-                        .foregroundStyle(.primary)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 20)
+                    .padding(.bottom, 32)
                 }
             }
-            .navigationTitle("About Tinyglim")
+            .navigationTitle("关于 Tinyglim")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
+                    Button("完成") { dismiss() }
                 }
             }
         }
@@ -591,7 +671,276 @@ private struct AppInfoSheet: View {
         }
         .task {
             await downloadAccessViewModel.prepare()
+            withAnimation(.easeOut(duration: 0.55)) {
+                animateSections = true
+            }
         }
+    }
+
+    private var heroSection: some View {
+        AppInfoSurface {
+            VStack(alignment: .leading, spacing: 18) {
+                HStack(alignment: .top) {
+                    ZStack {
+                        Circle()
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        Color(red: 0.90, green: 0.43, blue: 0.35),
+                                        Color(red: 0.83, green: 0.56, blue: 0.36)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .frame(width: 62, height: 62)
+
+                        Image(systemName: "photo.stack.fill")
+                            .font(.system(size: 26, weight: .semibold))
+                            .foregroundStyle(Color.white.opacity(0.96))
+                    }
+
+                    Spacer(minLength: 12)
+
+                    Text(heroContent.versionLabel)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(Color.black.opacity(0.58))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(
+                            Capsule(style: .continuous)
+                                .fill(CinematicPalette.warmCanvas)
+                        )
+                }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(heroContent.eyebrow)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(Color.black.opacity(0.48))
+                        .tracking(0.6)
+
+                    Text(heroContent.title)
+                        .font(.system(size: 34, weight: .bold, design: .serif))
+                        .foregroundStyle(Color.black.opacity(0.88))
+
+                    Text(heroContent.summary)
+                        .font(.subheadline)
+                        .foregroundStyle(Color.black.opacity(0.62))
+                        .lineSpacing(4)
+                }
+
+                HStack(spacing: 8) {
+                    ForEach(heroContent.highlights, id: \.self) { item in
+                        Text(item)
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(Color.black.opacity(0.68))
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 8)
+                            .background(
+                                Capsule(style: .continuous)
+                                    .fill(Color.white.opacity(0.76))
+                            )
+                            .overlay(
+                                Capsule(style: .continuous)
+                                    .stroke(Color.black.opacity(0.05), lineWidth: 1)
+                            )
+                    }
+                }
+            }
+        }
+    }
+
+    private var accessSection: some View {
+        Button {
+            showPaywall = true
+        } label: {
+            AppInfoSurface {
+                VStack(alignment: .leading, spacing: 14) {
+                    HStack(alignment: .top, spacing: 12) {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(accessContent.title)
+                                .font(.headline)
+                                .foregroundStyle(Color.black.opacity(0.88))
+
+                            Text(accessContent.summary)
+                                .font(.subheadline)
+                                .foregroundStyle(Color.black.opacity(0.62))
+                                .multilineTextAlignment(.leading)
+                        }
+
+                        Spacer(minLength: 12)
+
+                        Text(accessContent.status)
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(accessContent.isUnlocked ? Color.green.opacity(0.9) : Color(red: 0.79, green: 0.47, blue: 0.17))
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 7)
+                            .background(
+                                Capsule(style: .continuous)
+                                    .fill(accessContent.isUnlocked ? Color.green.opacity(0.12) : Color(red: 0.97, green: 0.90, blue: 0.79))
+                            )
+                    }
+
+                    if let priceText = downloadAccessViewModel.priceText, !downloadAccessViewModel.isPurchased {
+                        Text("当前为一次性购买，价格 \(priceText)。")
+                            .font(.caption)
+                            .foregroundStyle(Color.black.opacity(0.5))
+                    }
+
+                    HStack(spacing: 10) {
+                        Image(systemName: "arrow.down.circle")
+                            .font(.body.weight(.semibold))
+                            .foregroundStyle(Color.black.opacity(0.72))
+
+                        Text(accessContent.actionTitle)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Color.black.opacity(0.82))
+
+                        Spacer()
+
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(Color.black.opacity(0.32))
+                    }
+                    .padding(.top, 2)
+                }
+            }
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var actionsSection: some View {
+        AppInfoSurface {
+            VStack(spacing: 0) {
+                ForEach(Array(primaryCards.enumerated()), id: \.element.id) { index, card in
+                    Button {
+                        handleTap(for: card)
+                    } label: {
+                        HStack(alignment: .center, spacing: 14) {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                    .fill(CinematicPalette.warmCanvas)
+                                    .frame(width: 42, height: 42)
+
+                                Image(systemName: card.systemImage)
+                                    .font(.system(size: 16, weight: .semibold))
+                                    .foregroundStyle(Color.black.opacity(0.68))
+                            }
+
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(card.title)
+                                    .font(.body.weight(.semibold))
+                                    .foregroundStyle(Color.black.opacity(0.84))
+
+                                Text(card.subtitle)
+                                    .font(.caption)
+                                    .foregroundStyle(Color.black.opacity(0.54))
+                                    .multilineTextAlignment(.leading)
+                            }
+
+                            Spacer(minLength: 12)
+
+                            Image(systemName: "chevron.right")
+                                .font(.caption.weight(.bold))
+                                .foregroundStyle(Color.black.opacity(0.24))
+                        }
+                        .padding(.vertical, 14)
+                    }
+                    .buttonStyle(.plain)
+
+                    if index < primaryCards.count - 1 {
+                        Divider()
+                            .overlay(Color.black.opacity(0.06))
+                    }
+                }
+            }
+        }
+    }
+
+    private var footerSection: some View {
+        VStack(spacing: 6) {
+            Text("Tinyglim 希望把照片体验做得更轻一点，也更安静一点。")
+                .font(.footnote)
+                .foregroundStyle(Color.black.opacity(0.5))
+                .multilineTextAlignment(.center)
+
+            Text("如需反馈或合作，可直接通过邮件联系。")
+                .font(.caption)
+                .foregroundStyle(Color.black.opacity(0.38))
+                .multilineTextAlignment(.center)
+        }
+        .padding(.horizontal, 12)
+    }
+
+    private func handleTap(for card: AppInfoPrimaryCardContent) {
+        switch card.id {
+        case "contact":
+            openURL(authorEmailURL)
+        case "privacy":
+            safariURL = privacyURL
+        case "terms":
+            safariURL = termsURL
+        default:
+            break
+        }
+    }
+}
+
+private struct AppInfoBackground: View {
+    @State private var animate = false
+
+    var body: some View {
+        ZStack {
+            LinearGradient(
+                colors: [
+                    CinematicPalette.warmCanvas,
+                    Color(red: 0.989, green: 0.979, blue: 0.964),
+                    Color.white
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+
+            Circle()
+                .fill(Color(red: 0.91, green: 0.67, blue: 0.50).opacity(0.18))
+                .frame(width: 240, height: 240)
+                .blur(radius: 32)
+                .offset(x: animate ? 120 : 86, y: animate ? -220 : -180)
+
+            Circle()
+                .fill(Color(red: 0.86, green: 0.43, blue: 0.38).opacity(0.12))
+                .frame(width: 220, height: 220)
+                .blur(radius: 40)
+                .offset(x: animate ? -110 : -70, y: animate ? 220 : 180)
+        }
+        .onAppear {
+            withAnimation(.easeInOut(duration: 7).repeatForever(autoreverses: true)) {
+                animate.toggle()
+            }
+        }
+    }
+}
+
+private struct AppInfoSurface<Content: View>: View {
+    let content: Content
+
+    init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
+
+    var body: some View {
+        content
+            .padding(20)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    .fill(CinematicPalette.warmSurface.opacity(0.94))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    .stroke(Color.black.opacity(0.05), lineWidth: 1)
+            )
+            .shadow(color: Color.black.opacity(0.08), radius: 18, x: 0, y: 8)
     }
 }
 
